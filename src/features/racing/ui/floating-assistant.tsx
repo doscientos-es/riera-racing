@@ -11,13 +11,12 @@ import { Field, FormDialog, today, uid, type Change } from './shared'
 import { useSpeechRecognition } from './use-speech-recognition'
 
 function TypedReply({ text }: { text: string }) {
-  const [visible, setVisible] = useState('')
+  const [reducedMotion] = useState(
+    () => typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
+  )
+  const [visible, setVisible] = useState(() => reducedMotion ? text : '')
   useEffect(() => {
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
-      setVisible(text)
-      return
-    }
-    setVisible('')
+    if (reducedMotion) return
     let count = 0
     const timer = window.setInterval(() => {
       count = Math.min(count + 3, text.length)
@@ -25,7 +24,7 @@ function TypedReply({ text }: { text: string }) {
       if (count === text.length) window.clearInterval(timer)
     }, 30)
     return () => window.clearInterval(timer)
-  }, [text])
+  }, [text, reducedMotion])
   return (
     <output className="rr-voice-result" aria-live="polite">
       <span className="sr-only">{text}</span>
@@ -69,7 +68,7 @@ export function FloatingAssistant({
         )
         setResult(
           saved
-            ? `Hecho en la demo: ${prepared.summary}. Guardado en este navegador.`
+            ? `Hecho: ${prepared.summary}. Guardado en este navegador.`
             : 'No he podido guardar la acción. Revisa el aviso de la página.',
         )
       }
@@ -119,7 +118,7 @@ export function FloatingAssistant({
     ? 'Preparando acción'
     : speech.listening
       ? 'Escuchando'
-      : 'Asistente de taller'
+      : 'Listo'
   return (
     <>
       {open && (
@@ -129,14 +128,11 @@ export function FloatingAssistant({
         />
       )}
       {open && (
-        <section className="rr-voice-panel" aria-label="Asistente de voz simulado">
+        <section className="rr-voice-panel" aria-label="Asistente de voz">
           <header className="rr-voice-head">
-            <span className="rr-voice-mark">
-              <Sparkles size={18} />
-            </span>
-            <div>
-              <strong>Asistente de taller</strong>
-              <small>Simulación · sin IA conectada</small>
+            <div className="rr-voice-status" aria-live="polite">
+              <span className={speech.listening ? 'is-listening' : ''} />
+              {status}
             </div>
             <button
               type="button"
@@ -148,10 +144,6 @@ export function FloatingAssistant({
             </button>
           </header>
           <div className="rr-voice-body">
-            <div className="rr-voice-status">
-              <span className={speech.listening ? 'is-listening' : ''} />
-              {status}
-            </div>
             <p className={`rr-voice-transcript${text ? '' : ' is-placeholder'}`}>
               {text ||
                 (speech.listening ? 'Te escucho. ¿Qué necesitas?' : '¿En qué puedo ayudarte?')}
@@ -165,59 +157,76 @@ export function FloatingAssistant({
             {reply && (
               <div className="rr-voice-reply">
                 <Sparkles size={17} />
-                <TypedReply text={reply} />
+                <TypedReply key={reply} text={reply} />
               </div>
             )}
             {proposal && !speech.listening && !processing && (
-              <button
-                type="button"
-                className="rr-voice-link"
-                onClick={() => setReviewOpen(true)}
-              >
+              <button type="button" className="rr-voice-link" onClick={() => setReviewOpen(true)}>
                 Revisar acción <ArrowUpRight size={16} />
               </button>
             )}
             {!speech.listening && !processing && (
-              <button type="button" className="rr-voice-link" onClick={() => { setDraft(text); setTextOpen(true) }}>
+              <button
+                type="button"
+                className="rr-voice-link"
+                onClick={() => {
+                  setDraft(text)
+                  setTextOpen(true)
+                }}
+              >
                 Escribir indicación <ArrowUpRight size={16} />
               </button>
             )}
           </div>
           <p className="rr-voice-privacy">
-            El navegador puede enviar el audio a su proveedor. Usa solo datos ficticios.
+            El navegador puede enviar el audio a su proveedor. No compartas datos sensibles.
           </p>
         </section>
       )}
       <FormDialog open={textOpen} onOpenChange={setTextOpen} title="Escribir indicación">
-        <form className="rr-stack" onSubmit={(event) => {
-          event.preventDefault()
-          const value = draft.trim()
-          if (!value) return
-          speech.clearError()
-          setResult('')
-          setProposal(null)
-          setTextOpen(false)
-          run(value)
-        }}>
+        <form
+          className="rr-stack"
+          onSubmit={(event) => {
+            event.preventDefault()
+            const value = draft.trim()
+            if (!value) return
+            speech.clearError()
+            setResult('')
+            setProposal(null)
+            setTextOpen(false)
+            run(value)
+          }}
+        >
           <Field label="Indicación">
-            <textarea value={draft} onChange={(event) => setDraft(event.target.value)} rows={4} required />
+            <textarea
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+              rows={4}
+              required
+            />
           </Field>
-          <Button type="submit" disabled={!draft.trim()}>Preparar acción</Button>
+          <Button type="submit" disabled={!draft.trim()}>
+            Preparar acción
+          </Button>
         </form>
       </FormDialog>
       <FormDialog open={reviewOpen} onOpenChange={setReviewOpen} title="Revisar acción">
-        {proposal && <AssistantForm
-          proposal={proposal}
-          setProposal={setProposal}
-          state={state}
-          change={change}
-          principal={principal}
-          cancel={() => setReviewOpen(false)}
-          onSaved={() => {
-            setResult(`Hecho en la demo: ${describeProposal(proposal, state)}. Guardado en este navegador.`)
-            setProposal(null)
-          }}
-        />}
+        {proposal && (
+          <AssistantForm
+            proposal={proposal}
+            setProposal={setProposal}
+            state={state}
+            change={change}
+            principal={principal}
+            cancel={() => setReviewOpen(false)}
+            onSaved={() => {
+              setResult(
+                `Hecho: ${describeProposal(proposal, state)}. Guardado en este navegador.`,
+              )
+              setProposal(null)
+            }}
+          />
+        )}
       </FormDialog>
       <button
         type="button"

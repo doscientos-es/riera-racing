@@ -18,8 +18,7 @@ export function LoginPage({
         <img src="/icon.png" alt="Riera Racing" className="rr-login-logo" />
         <h1>Elige quién eres</h1>
         <p className="rr-login-intro">
-          Accede a la demo del taller seleccionando un perfil. Los datos son ficticios y se guardan
-          en este navegador.
+          Selecciona tu perfil para acceder al taller.
         </p>
         <div className="rr-login-grid">
           {demoProfiles.map(({ id, principal: profile }) => (
@@ -51,8 +50,8 @@ export function LoginPage({
           </p>
         )}
         <p className="rr-login-disclaimer">
-          Acceso simulado, sin contraseña ni seguridad real. Los perfiles adaptan la demo, pero no
-          protegen los datos almacenados en el navegador.
+          Acceso sin contraseña. Los perfiles no protegen los datos almacenados en este navegador;
+          no introduzcas datos sensibles.
         </p>
       </div>
     </main>

@@ -42,7 +42,6 @@ export function InventoryPage({ state, change }: { state: Workshop; change: Chan
     <div className="rr-stack">
       <div className="rr-heading">
         <div>
-          <span className="rr-eyebrow">PIEZAS Y CONSUMIBLES</span>
           <h1>Inventario</h1>
         </div>
         <Button aria-haspopup="dialog" aria-expanded={adding} onClick={() => setAdding(true)}>
@@ -145,7 +144,6 @@ export function PurchasesPage({ state, change }: { state: Workshop; change: Chan
     <div className="rr-stack">
       <div className="rr-heading">
         <div>
-          <span className="rr-eyebrow">PROVEEDORES Y RECEPCIONES</span>
           <h1>Compras</h1>
         </div>
         <Button aria-haspopup="dialog" aria-expanded={adding} onClick={() => setAdding(true)}>
@@ -159,7 +157,7 @@ export function PurchasesPage({ state, change }: { state: Workshop; change: Chan
           if (!open) setProjectId('')
         }}
         title="Nuevo pedido"
-        description="Registro interno de ejemplo; no se envía al proveedor."
+        description="Registro interno; no se envía al proveedor."
       >
         <form className="rr-form-grid" onSubmit={save}>
           <Field label="Pieza">
@@ -188,7 +186,7 @@ export function PurchasesPage({ state, change }: { state: Workshop; change: Chan
       </FormDialog>
       <Section
         title="Pedidos y recepciones"
-        subtitle="Una pieza por pedido en esta demo. Confirma diferencias antes de modificar el stock."
+        subtitle="Una pieza por pedido. Confirma diferencias antes de modificar el stock."
       >
         {state.purchases.length ? (
           <div className="rr-list">
@@ -303,7 +301,7 @@ function PurchaseRow({
           )}
           <Button type="submit">Confirmar recepción</Button>
           <small>
-            Se sumará solo la cantidad recibida. Esta demo cierra el pedido; no gestiona entregas
+            Se sumará solo la cantidad recibida. La recepción cierra el pedido; no gestiona entregas
             pendientes.
           </small>
         </form>

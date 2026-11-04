@@ -2,7 +2,14 @@ import type { Absence, Incident, Part, Workshop } from '../domain/model'
 import { addAbsence, addIncident, addPart } from '../domain/workshop'
 import type { AssistantPrincipal } from './assistant-access'
 
-const workerPages = new Set(['inicio', 'proyectos', 'planificacion', 'incidencias', 'taller', 'equipo'])
+const workerPages = new Set([
+  'inicio',
+  'proyectos',
+  'planificacion',
+  'incidencias',
+  'taller',
+  'equipo',
+])
 
 export function canVisitPage(principal: AssistantPrincipal, page: string): boolean {
   return principal.role === 'admin' || workerPages.has(page)
@@ -10,9 +17,11 @@ export function canVisitPage(principal: AssistantPrincipal, page: string): boole
 
 export function isWorkerAssigned(state: Workshop, name: string, projectId: string): boolean {
   const project = state.projects.find((item) => item.id === projectId)
-  return Boolean(project && (project.responsible === name || state.tasks.some(
-    (task) => task.projectId === projectId && task.worker === name,
-  )))
+  return Boolean(
+    project &&
+    (project.responsible === name ||
+      state.tasks.some((task) => task.projectId === projectId && task.worker === name)),
+  )
 }
 
 export function workerWorkshop(state: Workshop, name: string): Workshop {
@@ -25,7 +34,9 @@ export function workerWorkshop(state: Workshop, name: string): Workshop {
     parts: state.parts.filter((part) => part.worker === name && ids.has(part.projectId)),
     absences: state.absences.filter((absence) => absence.worker === name),
     incidents: state.incidents.filter((incident) => ids.has(incident.projectId)),
-    purchases: [], invoices: [], activity: [],
+    purchases: [],
+    invoices: [],
+    activity: [],
   }
 }
 
@@ -34,19 +45,35 @@ function requireAssignment(state: Workshop, name: string, projectId: string) {
     throw new Error('Solo puedes trabajar en proyectos asignados.')
 }
 
-export function setWorkerTaskDone(state: Workshop, name: string, taskId: string, done: boolean): Workshop {
+export function setWorkerTaskDone(
+  state: Workshop,
+  name: string,
+  taskId: string,
+  done: boolean,
+): Workshop {
   const task = state.tasks.find((item) => item.id === taskId)
   if (!task || task.worker !== name) throw new Error('Solo puedes modificar tus tareas asignadas.')
   requireAssignment(state, name, task.projectId)
-  return { ...state, tasks: state.tasks.map((item) => item.id === taskId ? { ...item, done } : item) }
+  return {
+    ...state,
+    tasks: state.tasks.map((item) => (item.id === taskId ? { ...item, done } : item)),
+  }
 }
 
-export function addWorkerPart(state: Workshop, name: string, part: Omit<Part, 'materialCost' | 'worker'>): Workshop {
+export function addWorkerPart(
+  state: Workshop,
+  name: string,
+  part: Omit<Part, 'materialCost' | 'worker'>,
+): Workshop {
   requireAssignment(state, name, part.projectId)
   return addPart(state, { ...part, worker: name })
 }
 
-export function addWorkerAbsence(state: Workshop, name: string, absence: Omit<Absence, 'worker'>): Workshop {
+export function addWorkerAbsence(
+  state: Workshop,
+  name: string,
+  absence: Omit<Absence, 'worker'>,
+): Workshop {
   return addAbsence(state, { ...absence, worker: name })
 }
 
@@ -55,9 +82,17 @@ export function addWorkerIncident(state: Workshop, name: string, incident: Incid
   return addIncident(state, incident)
 }
 
-export function setWorkerIncidentResolved(state: Workshop, name: string, id: string, resolved: boolean): Workshop {
+export function setWorkerIncidentResolved(
+  state: Workshop,
+  name: string,
+  id: string,
+  resolved: boolean,
+): Workshop {
   const incident = state.incidents.find((item) => item.id === id)
   if (!incident) throw new Error('No se ha encontrado la incidencia.')
   requireAssignment(state, name, incident.projectId)
-  return { ...state, incidents: state.incidents.map((item) => item.id === id ? { ...item, resolved } : item) }
+  return {
+    ...state,
+    incidents: state.incidents.map((item) => (item.id === id ? { ...item, resolved } : item)),
+  }
 }

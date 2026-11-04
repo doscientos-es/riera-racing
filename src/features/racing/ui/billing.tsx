@@ -37,7 +37,7 @@ export function BillingPage({ state, change }: { state: Workshop; change: Change
     }
   }
   const exportCsv = () =>
-    downloadCsv('riera-racing-borradores-demo.csv', [
+    downloadCsv('riera-racing-borradores.csv', [
       ['Fecha', 'Proyecto', 'Cliente', 'Vehículo', 'Base sin IVA', 'IVA 21%', 'Total', 'Estado'],
       ...state.invoices.map((invoice) => {
         const project = state.projects.find((item) => item.id === invoice.projectId)
@@ -50,7 +50,7 @@ export function BillingPage({ state, change }: { state: Workshop; change: Change
           (base / 100).toFixed(2).replace('.', ','),
           (Math.round(base * 0.21) / 100).toFixed(2).replace('.', ','),
           ((base + Math.round(base * 0.21)) / 100).toFixed(2).replace('.', ','),
-          invoice.paid ? 'Cobro simulado' : 'Borrador',
+          invoice.paid ? 'Pago marcado' : 'Borrador',
         ]
       }),
     ])
@@ -58,12 +58,11 @@ export function BillingPage({ state, change }: { state: Workshop; change: Change
     <div className="rr-stack">
       <div className="rr-heading">
         <div>
-          <span className="rr-eyebrow">CIERRE Y GESTORÍA</span>
           <h1>Facturación</h1>
         </div>
         <div className="rr-actions">
           <Button variant="outline" disabled={!state.invoices.length} onClick={exportCsv}>
-            Descargar CSV de ejemplo
+            Descargar CSV
           </Button>
           <Button aria-haspopup="dialog" aria-expanded={adding} onClick={() => setAdding(true)}>
             + Preparar borrador
@@ -71,8 +70,8 @@ export function BillingPage({ state, change }: { state: Workshop; change: Change
         </div>
       </div>
       <div className="rr-notice">
-        <strong>Solo demostración.</strong> Los borradores no son facturas fiscales, no se envían y
-        el CSV debe adaptarse al formato de la asesoría.
+        Los borradores no son facturas fiscales, no se envían y el CSV debe adaptarse al formato de
+        la asesoría. Marcar un pago no realiza ningún cobro.
       </div>
       <FormDialog
         open={adding}
@@ -97,7 +96,7 @@ export function BillingPage({ state, change }: { state: Workshop; change: Change
           </Button>
         </form>
       </FormDialog>
-      <Section title="Borradores" subtitle="Importes de ejemplo con IVA del 21 %.">
+      <Section title="Borradores" subtitle="Importes con IVA del 21 %.">
         {state.invoices.length ? (
           <div className="rr-list">
             {state.invoices.map((invoice) => {
@@ -118,7 +117,7 @@ export function BillingPage({ state, change }: { state: Workshop; change: Change
                     <div className="rr-actions">
                       <strong>{money(base + Math.round(base * 0.21))}</strong>
                       <Badge tone={invoice.paid ? 'green' : 'amber'}>
-                        {invoice.paid ? 'Cobro simulado' : 'Borrador'}
+                        {invoice.paid ? 'Pago marcado' : 'Borrador'}
                       </Badge>
                       {!invoice.paid && (
                         <Button
@@ -132,7 +131,7 @@ export function BillingPage({ state, change }: { state: Workshop; change: Change
                             }))
                           }
                         >
-                          Simular cobro
+                          Marcar pago
                         </Button>
                       )}
                     </div>

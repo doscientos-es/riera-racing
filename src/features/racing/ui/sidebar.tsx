@@ -1,5 +1,5 @@
 import { Button } from '@doscientos/ui'
-import { Search, type LucideIcon } from 'lucide-react'
+import { ChevronDown, Search, type LucideIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 import type { AssistantPrincipal } from '../application/assistant-access'
@@ -36,6 +36,7 @@ export function Sidebar({
   changeProfile: () => void
 }) {
   const [query, setQuery] = useState('')
+  const [profileOpen, setProfileOpen] = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
   const visible = filterNavigation(navigation, query)
   const groups = [...new Set(visible.map((item) => item.group))]
@@ -67,7 +68,6 @@ export function Sidebar({
         <img className="rr-sidebar-logo" src="/icon.png" alt="" />
         <div>
           <strong>Riera Racing</strong>
-          <span>{principal.role === 'admin' ? 'Administración' : principal.name} · demo</span>
         </div>
       </div>
       <label className="rr-sidebar-search">
@@ -112,17 +112,65 @@ export function Sidebar({
         {visible.length === 0 && <p className="rr-sidebar-empty">No hay módulos que coincidan.</p>}
       </nav>
       <div className="rr-sidebar-footer">
-        <Button className="rr-sidebar-primary" onClick={() => navigate(principal.role === 'admin' ? 'presupuestos' : 'planificacion')}>
+        <Button
+          className="rr-sidebar-primary"
+          onClick={() => navigate(principal.role === 'admin' ? 'presupuestos' : 'planificacion')}
+        >
           {principal.role === 'admin' ? 'Ver presupuestos' : 'Mis tareas'}
         </Button>
-        <button type="button" className="rr-sidebar-reset" onClick={changeProfile}>
-          Cambiar perfil
-        </button>
         {principal.role === 'admin' && (
           <button type="button" className="rr-sidebar-reset" onClick={reset}>
-            Restablecer datos de ejemplo
+            Restablecer datos iniciales
           </button>
         )}
+        <div className={`rr-profile-menu ${profileOpen ? 'is-open' : ''}`}>
+          {profileOpen && (
+            <div className="rr-profile-actions">
+              <button
+                type="button"
+                onClick={() => {
+                  setProfileOpen(false)
+                  changeProfile()
+                }}
+              >
+                Cambiar perfil
+              </button>
+              {principal.role === 'admin' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProfileOpen(false)
+                    reset()
+                  }}
+                >
+                  Restablecer datos iniciales
+                </button>
+              )}
+            </div>
+          )}
+          <button
+            type="button"
+            className="rr-profile-trigger"
+            aria-expanded={profileOpen}
+            onClick={() => setProfileOpen((open) => !open)}
+          >
+            <span className="rr-profile-avatar">
+              {(principal.role === 'admin'
+                ? 'RR'
+                : principal.name
+                    .split(/\s+/)
+                    .map((part) => part[0])
+                    .slice(0, 2)
+                    .join('')
+              ).toUpperCase()}
+            </span>
+            <span className="rr-profile-copy">
+              <strong>{principal.role === 'admin' ? 'Equipo Riera' : principal.name}</strong>
+              <small>{principal.role === 'admin' ? 'Administrador' : 'Equipo de taller'}</small>
+            </span>
+            <ChevronDown size={16} />
+          </button>
+        </div>
       </div>
     </aside>
   )

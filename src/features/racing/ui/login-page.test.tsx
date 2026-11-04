@@ -11,7 +11,9 @@ describe('acceso de demostración', () => {
     expect(html).toContain('Administración')
     expect(html).toContain('Àlex Ferrer')
     expect(html).toContain('sesión actual')
-    expect(html).toContain('sin contraseña ni seguridad real')
+    expect(html).toContain('Acceso sin contraseña')
+    expect(html).toContain('no protegen los datos')
+    expect(html).not.toMatch(/demo|prototipo|datos ficticios/i)
     expect(html).not.toContain('<form')
   })
 

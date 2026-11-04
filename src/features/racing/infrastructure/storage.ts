@@ -26,7 +26,7 @@ export function loadWorkshop(storage: Pick<Storage, 'getItem'>): Workshop {
     }
   } catch {
     throw new Error(
-      'No se pueden leer los datos guardados. Restablece la demo para recuperar los datos de ejemplo.',
+      'No se pueden leer los datos guardados. Restablece los datos iniciales para continuar.',
     )
   }
 }

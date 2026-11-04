@@ -19,7 +19,15 @@ import {
   type Change,
 } from './shared'
 
-export function OperationsPage({ state, change, worker }: { state: Workshop; change: Change; worker?: string | undefined }) {
+export function OperationsPage({
+  state,
+  change,
+  worker,
+}: {
+  state: Workshop
+  change: Change
+  worker?: string | undefined
+}) {
   const [adding, setAdding] = useState(false)
   const [projectId, setProjectId] = useState('')
   const [productId, setProductId] = useState('')
@@ -40,7 +48,9 @@ export function OperationsPage({ state, change, worker }: { state: Workshop; cha
           quantity: productId ? Number(data.get('quantity')) : 0,
           expense: eurosToCents(formText(data, 'expense')),
         }
-        return worker ? addWorkerPart(current, worker, part) : addPart(current, { ...part, worker: formText(data, 'worker').trim() })
+        return worker
+          ? addWorkerPart(current, worker, part)
+          : addPart(current, { ...part, worker: formText(data, 'worker').trim() })
       })
     ) {
       setAdding(false)
@@ -52,7 +62,6 @@ export function OperationsPage({ state, change, worker }: { state: Workshop; cha
     <div className="rr-stack">
       <div className="rr-heading">
         <div>
-          <span className="rr-eyebrow">EL DÍA A DÍA DEL EQUIPO</span>
           <h1>{worker ? 'Mis partes' : 'Partes de taller'}</h1>
         </div>
         <Button aria-haspopup="dialog" aria-expanded={adding} onClick={() => setAdding(true)}>
@@ -78,9 +87,11 @@ export function OperationsPage({ state, change, worker }: { state: Workshop; cha
           <Field label="Fecha">
             <input name="date" type="date" defaultValue={today()} required />
           </Field>
-          {!worker && <Field label="Operario">
-            <input name="worker" placeholder="Nombre del operario" required />
-          </Field>}
+          {!worker && (
+            <Field label="Operario">
+              <input name="worker" placeholder="Nombre del operario" required />
+            </Field>
+          )}
           <Field label="Intervención">
             <input name="description" placeholder="Trabajo realizado" required />
           </Field>
@@ -113,7 +124,11 @@ export function OperationsPage({ state, change, worker }: { state: Workshop; cha
       </FormDialog>
       <Section
         title="Últimas intervenciones"
-        subtitle={worker ? 'Tus partes registrados en proyectos asignados.' : 'El coste incluye las horas, las piezas consumidas y otros gastos registrados.'}
+        subtitle={
+          worker
+            ? 'Tus partes registrados en proyectos asignados.'
+            : 'El coste incluye las horas, las piezas consumidas y otros gastos registrados.'
+        }
       >
         {state.parts.length ? (
           <div className="rr-list">
@@ -131,12 +146,14 @@ export function OperationsPage({ state, change, worker }: { state: Workshop; cha
                       {part.hours} h {product && `· ${part.quantity} × ${product.name}`}
                     </p>
                   </div>
-                  {!worker && <Badge>
-                    {money(
-                      Math.round(part.hours * part.hourlyCost) + part.materialCost + part.expense,
-                    )}{' '}
-                    coste
-                  </Badge>}
+                  {!worker && (
+                    <Badge>
+                      {money(
+                        Math.round(part.hours * part.hourlyCost) + part.materialCost + part.expense,
+                      )}{' '}
+                      coste
+                    </Badge>
+                  )}
                 </div>
               )
             })}
@@ -149,22 +166,34 @@ export function OperationsPage({ state, change, worker }: { state: Workshop; cha
   )
 }
 
-export function TeamPage({ state, change, worker }: { state: Workshop; change: Change; worker?: string | undefined }) {
+export function TeamPage({
+  state,
+  change,
+  worker,
+}: {
+  state: Workshop
+  change: Change
+  worker?: string | undefined
+}) {
   const [adding, setAdding] = useState(false)
   const save = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
     const from = formText(data, 'from')
     const to = formText(data, 'to')
-    if (change((current) => worker
-      ? addWorkerAbsence(current, worker, { id: uid(), from, to })
-      : addAbsence(current, { id: uid(), worker: formText(data, 'worker').trim(), from, to }))) setAdding(false)
+    if (
+      change((current) =>
+        worker
+          ? addWorkerAbsence(current, worker, { id: uid(), from, to })
+          : addAbsence(current, { id: uid(), worker: formText(data, 'worker').trim(), from, to }),
+      )
+    )
+      setAdding(false)
   }
   return (
     <div className="rr-stack">
       <div className="rr-heading">
         <div>
-          <span className="rr-eyebrow">PERSONAS</span>
           <h1>{worker ? 'Mis vacaciones' : 'Equipo y vacaciones'}</h1>
         </div>
         <Button aria-haspopup="dialog" aria-expanded={adding} onClick={() => setAdding(true)}>
@@ -173,9 +202,11 @@ export function TeamPage({ state, change, worker }: { state: Workshop; change: C
       </div>
       <FormDialog open={adding} onOpenChange={setAdding} title="Registrar vacaciones">
         <form className="rr-form-grid" onSubmit={save}>
-          {!worker && <Field label="Operario">
-            <input name="worker" required />
-          </Field>}
+          {!worker && (
+            <Field label="Operario">
+              <input name="worker" required />
+            </Field>
+          )}
           <Field label="Desde">
             <input name="from" type="date" required />
           </Field>
@@ -187,7 +218,7 @@ export function TeamPage({ state, change, worker }: { state: Workshop; change: C
       </FormDialog>
       <Section
         title="Vacaciones registradas"
-        subtitle="Ejemplo local, sin gestión laboral ni aprobación de solicitudes."
+        subtitle="Sin gestión laboral ni aprobación de solicitudes."
       >
         {state.absences.length ? (
           <div className="rr-list">

@@ -1,7 +1,11 @@
 import { Button } from '@doscientos/ui'
 import { useState, type FormEvent } from 'react'
 
-import { addWorkerIncident, setWorkerIncidentResolved, setWorkerTaskDone } from '../application/worker-access'
+import {
+  addWorkerIncident,
+  setWorkerIncidentResolved,
+  setWorkerTaskDone,
+} from '../application/worker-access'
 import type { Workshop } from '../domain/model'
 import { addIncident, addTask } from '../domain/workshop'
 import {
@@ -17,7 +21,15 @@ import {
   type Change,
 } from './shared'
 
-export function PlanningPage({ state, change, worker }: { state: Workshop; change: Change; worker?: string | undefined }) {
+export function PlanningPage({
+  state,
+  change,
+  worker,
+}: {
+  state: Workshop
+  change: Change
+  worker?: string | undefined
+}) {
   const [adding, setAdding] = useState(false)
   const [projectId, setProjectId] = useState('')
   const save = (event: FormEvent<HTMLFormElement>) => {
@@ -46,9 +58,11 @@ export function PlanningPage({ state, change, worker }: { state: Workshop; chang
         <div>
           <h1>{worker ? 'Mis tareas' : 'Planificación'}</h1>
         </div>
-        {!worker && <Button aria-haspopup="dialog" aria-expanded={adding} onClick={() => setAdding(true)}>
-          + Asignar tarea
-        </Button>}
+        {!worker && (
+          <Button aria-haspopup="dialog" aria-expanded={adding} onClick={() => setAdding(true)}>
+            + Asignar tarea
+          </Button>
+        )}
       </div>
       <FormDialog
         open={adding}
@@ -88,13 +102,16 @@ export function PlanningPage({ state, change, worker }: { state: Workshop; chang
                       checked={task.done}
                       onChange={(event) => {
                         const done = event.target.checked
-                        change((current) => worker
-                          ? setWorkerTaskDone(current, worker, task.id, done)
-                          : {
-                            ...current, tasks: current.tasks.map((item) =>
-                              item.id === task.id ? { ...item, done } : item,
-                            )
-                          })
+                        change((current) =>
+                          worker
+                            ? setWorkerTaskDone(current, worker, task.id, done)
+                            : {
+                                ...current,
+                                tasks: current.tasks.map((item) =>
+                                  item.id === task.id ? { ...item, done } : item,
+                                ),
+                              },
+                        )
                       }}
                     />{' '}
                     <strong>{task.description}</strong>
@@ -113,30 +130,40 @@ export function PlanningPage({ state, change, worker }: { state: Workshop; chang
           <Empty>No hay tareas asignadas.</Empty>
         )}
       </Section>
-      {!worker && <Section
-        title="Ausencias registradas"
-        subtitle="Consulta las fechas antes de asignar tareas; no se comprueban automáticamente."
-      >
-        {state.absences.length ? (
-          <div className="rr-list">
-            {state.absences.map((absence) => (
-              <div className="rr-list-row" key={absence.id}>
-                <strong>{absence.worker}</strong>
-                <span>
-                  {absence.from} → {absence.to}
-                </span>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <Empty>No hay ausencias registradas.</Empty>
-        )}
-      </Section>}
+      {!worker && (
+        <Section
+          title="Ausencias registradas"
+          subtitle="Consulta las fechas antes de asignar tareas; no se comprueban automáticamente."
+        >
+          {state.absences.length ? (
+            <div className="rr-list">
+              {state.absences.map((absence) => (
+                <div className="rr-list-row" key={absence.id}>
+                  <strong>{absence.worker}</strong>
+                  <span>
+                    {absence.from} → {absence.to}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <Empty>No hay ausencias registradas.</Empty>
+          )}
+        </Section>
+      )}
     </div>
   )
 }
 
-export function IncidentsPage({ state, change, worker }: { state: Workshop; change: Change; worker?: string | undefined }) {
+export function IncidentsPage({
+  state,
+  change,
+  worker,
+}: {
+  state: Workshop
+  change: Change
+  worker?: string | undefined
+}) {
   const [adding, setAdding] = useState(false)
   const [projectId, setProjectId] = useState('')
   const save = (event: FormEvent<HTMLFormElement>) => {
@@ -152,7 +179,9 @@ export function IncidentsPage({ state, change, worker }: { state: Workshop; chan
           description: formText(data, 'description').trim(),
           resolved: false,
         }
-        return worker ? addWorkerIncident(current, worker, incident) : addIncident(current, incident)
+        return worker
+          ? addWorkerIncident(current, worker, incident)
+          : addIncident(current, incident)
       })
     ) {
       form.reset()
@@ -207,13 +236,23 @@ export function IncidentsPage({ state, change, worker }: { state: Workshop; chan
                   <Button
                     variant="outline"
                     onClick={() =>
-                      change((current) => worker
-                        ? setWorkerIncidentResolved(current, worker, incident.id, !incident.resolved)
-                        : {
-                          ...current, incidents: current.incidents.map((item) =>
-                            item.id === incident.id ? { ...item, resolved: !item.resolved } : item,
-                          )
-                        })
+                      change((current) =>
+                        worker
+                          ? setWorkerIncidentResolved(
+                              current,
+                              worker,
+                              incident.id,
+                              !incident.resolved,
+                            )
+                          : {
+                              ...current,
+                              incidents: current.incidents.map((item) =>
+                                item.id === incident.id
+                                  ? { ...item, resolved: !item.resolved }
+                                  : item,
+                              ),
+                            },
+                      )
                     }
                   >
                     {incident.resolved ? 'Reabrir' : 'Resolver'}

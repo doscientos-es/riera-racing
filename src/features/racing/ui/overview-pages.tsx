@@ -102,18 +102,18 @@ export function FinanceOverviewPage({
       ) : mode === 'contabilidad' ? (
         <Section
           title="Seguimiento de borradores"
-          subtitle="Importes sin IVA; los cobros marcados son simulados."
+          subtitle="Importes sin IVA; marcar un pago no realiza ningún cobro."
         >
           <div className="rr-metrics rr-metrics-small">
             <div>
-              <span>Sin cobro simulado</span>
+              <span>Sin pago marcado</span>
               <strong>
                 {money(unpaidDrafts.reduce((sum, invoice) => sum + quoteTotal(invoice.lines), 0))}
               </strong>
               <small>{unpaidDrafts.length} borradores</small>
             </div>
             <div>
-              <span>Con cobro simulado</span>
+              <span>Con pago marcado</span>
               <strong>
                 {money(paidDrafts.reduce((sum, invoice) => sum + quoteTotal(invoice.lines), 0))}
               </strong>

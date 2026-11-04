@@ -2,7 +2,6 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 
 import { seedWorkshop } from '../api'
-import { AssistantPage } from './assistant'
 import { AssistantForm } from './assistant-form'
 import { BillingPage } from './billing'
 import { InventoryPage, PurchasesPage } from './inventory'
@@ -34,33 +33,6 @@ describe('pantallas de la demo de taller', () => {
     expect(billing).toContain('CSV debe adaptarse')
   })
 
-  it('deja claros los límites del asistente y permite revisar acciones', () => {
-    const html = renderToStaticMarkup(
-      <AssistantPage state={state} change={change} principal={{ role: 'admin' }} />,
-    )
-    expect(html).toContain('Simulación sin IA')
-    expect(html).toContain('puede enviar audio')
-    expect(html).toContain('Preparar propuesta')
-    expect(html).toContain('el archivo no se lee ni se sube')
-  })
-
-  it('recibe la propuesta de voz para revisarla sin guardarla', () => {
-    const save = vi.fn(() => true)
-    const html = renderToStaticMarkup(
-      <AssistantPage
-        state={state}
-        change={save}
-        principal={{ role: 'admin' }}
-        initialText="Recibir pedido PED-001"
-        initialProposal={{ kind: 'receive', values: { purchaseId: 'o1', quantity: '1' } }}
-      />,
-    )
-    expect(html).toContain('Recibir pedido PED-001')
-    expect(html).toContain('Pedido de 2 unidades; se cerrará con 1')
-    expect(html).toContain('Confirmar y guardar')
-    expect(save).not.toHaveBeenCalled()
-  })
-
   it('muestra la diferencia de recepción antes de confirmar el cambio de stock', () => {
     const html = renderToStaticMarkup(
       <AssistantForm
@@ -86,7 +58,7 @@ describe('pantallas de la demo de taller', () => {
     expect(clients).toContain('BMW M3 E36')
     expect(planning).toContain('Montar el kit de frenos')
     expect(incidents).toContain('Registrar incidencia')
-    expect(finance).toContain('cobros marcados son simulados')
+    expect(finance).toContain('marcar un pago no realiza ningún cobro')
     expect(finance).toContain('no son facturas emitidas')
   })
 

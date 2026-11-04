@@ -30,6 +30,7 @@ import { Dashboard, type Page } from './dashboard'
 import { FloatingAssistant } from './floating-assistant'
 import { InventoryPage, PurchasesPage } from './inventory'
 import { LoginPage } from './login-page'
+import { MobileNavigation } from './mobile-navigation'
 import { OperationsPage, TeamPage } from './operations'
 import { ActivityPage, ClientsPage, FinanceOverviewPage } from './overview-pages'
 import { IncidentsPage, PlanningPage } from './planning'
@@ -64,7 +65,7 @@ function read(): Loaded {
     return {
       state: null,
       error:
-        'No se han podido leer los datos locales. Comprueba que el navegador permite el almacenamiento o restablece la demo.',
+        'No se han podido leer los datos locales. Comprueba que el navegador permite el almacenamiento o restablece los datos iniciales.',
     }
   }
 }
@@ -121,7 +122,9 @@ export function RacingApp() {
   }, [])
   const reset = () => {
     if (
-      !window.confirm('¿Restablecer la demo? Se perderán los cambios guardados en este navegador.')
+      !window.confirm(
+        '¿Restablecer los datos iniciales? Se perderán los cambios guardados en este navegador.',
+      )
     )
       return
     try {
@@ -129,7 +132,7 @@ export function RacingApp() {
       setLoaded(read())
       setSelected('')
       setPage('inicio')
-      setMessage('Datos de ejemplo restablecidos.')
+      setMessage('Datos iniciales restablecidos.')
     } catch {
       setMessage('No se han podido restablecer los datos locales.')
     }
@@ -163,7 +166,7 @@ export function RacingApp() {
   }
   const change: Change = (command) =>
     commit(command, navigation.find((item) => item.id === page)?.label ?? 'Taller')
-  const assistantChange: Change = (command) => commit(command, 'Asistente simulado')
+  const assistantChange: Change = (command) => commit(command, 'Asistente')
   const changeProfile = () => {
     window.history.pushState(null, '', '/login')
     setPathname('/login')
@@ -189,10 +192,10 @@ export function RacingApp() {
   if (!loaded.state)
     return (
       <main className="rr-failure">
-        <h1>No se puede abrir la demo</h1>
+        <h1>No se puede abrir la aplicación</h1>
         <p>{loaded.error}</p>
         <button className="rr-button" onClick={reset}>
-          Restablecer datos de ejemplo
+          Restablecer datos iniciales
         </button>
         <output>{message}</output>
       </main>
@@ -201,11 +204,17 @@ export function RacingApp() {
   const state = worker ? workerWorkshop(loaded.state, worker) : loaded.state
   const visibleNavigation = navigation
     .filter((item) => canVisitPage(principal, item.id))
-    .map((item) => worker && item.id === 'proyectos' ? { ...item, label: 'Mis proyectos' }
-      : worker && item.id === 'planificacion' ? { ...item, label: 'Mis tareas' }
-        : worker && item.id === 'taller' ? { ...item, label: 'Mis partes' }
-          : worker && item.id === 'equipo' ? { ...item, label: 'Mis vacaciones', group: 'Operativa' }
-            : item)
+    .map((item) =>
+      worker && item.id === 'proyectos'
+        ? { ...item, label: 'Mis proyectos' }
+        : worker && item.id === 'planificacion'
+          ? { ...item, label: 'Mis tareas' }
+          : worker && item.id === 'taller'
+            ? { ...item, label: 'Mis partes' }
+            : worker && item.id === 'equipo'
+              ? { ...item, label: 'Mis vacaciones', group: 'Operativa' }
+              : item,
+    )
   const currentPage = canVisitPage(principal, page) ? page : 'inicio'
   const navigate = (next: Page) => {
     if (canVisitPage(principal, next)) setPage(next)
@@ -226,35 +235,7 @@ export function RacingApp() {
           changeProfile={changeProfile}
         />
         <div className="rr-main">
-          <header className="rr-topbar">
-            <div>
-              <img className="rr-mobile-brand" src="/icon.png" alt="" />
-              <span>Riera Racing</span>
-              <span className="rr-top-divider">/</span>
-              <strong>{visibleNavigation.find((item) => item.id === currentPage)?.label}</strong>
-            </div>
-            <div className="rr-top-session">
-              <span className="rr-top-demo">
-                DEMO LOCAL <span />
-              </span>
-              <button type="button" className="rr-change-profile-mobile" onClick={changeProfile}>
-                Cambiar perfil
-              </button>
-            </div>
-          </header>
           <main id="contenido" className="rr-content">
-            <div className="rr-mobile-nav" aria-label="Secciones">
-              {visibleNavigation.map(({ id, label }) => (
-                <button
-                  key={id}
-                  className={currentPage === id ? 'active' : ''}
-                  onClick={() => navigate(id)}
-                  aria-current={currentPage === id ? 'page' : undefined}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
             {message && (
               <output className="rr-message">
                 <span>{message}</span>
@@ -263,9 +244,12 @@ export function RacingApp() {
                 </button>
               </output>
             )}
-            {currentPage === 'inicio' && (
-              worker ? <WorkerDashboard state={state} name={worker} navigate={navigate} /> : <Dashboard state={state} navigate={navigate} select={setSelected} />
-            )}
+            {currentPage === 'inicio' &&
+              (worker ? (
+                <WorkerDashboard state={state} name={worker} navigate={navigate} />
+              ) : (
+                <Dashboard state={state} navigate={navigate} select={setSelected} />
+              ))}
             {worker && currentPage === 'proyectos' && <WorkerProjects state={state} />}
             {!worker && (currentPage === 'proyectos' || currentPage === 'presupuestos') && (
               <ProjectsPage
@@ -277,8 +261,12 @@ export function RacingApp() {
                 budgetsOnly={currentPage === 'presupuestos'}
               />
             )}
-            {currentPage === 'planificacion' && <PlanningPage key={principal.role} state={state} change={change} worker={worker} />}
-            {currentPage === 'incidencias' && <IncidentsPage key={principal.role} state={state} change={change} worker={worker} />}
+            {currentPage === 'planificacion' && (
+              <PlanningPage key={principal.role} state={state} change={change} worker={worker} />
+            )}
+            {currentPage === 'incidencias' && (
+              <IncidentsPage key={principal.role} state={state} change={change} worker={worker} />
+            )}
             {currentPage === 'clientes' && (
               <ClientsPage
                 state={state}
@@ -288,23 +276,37 @@ export function RacingApp() {
                 }}
               />
             )}
-            {currentPage === 'taller' && <OperationsPage key={principal.role} state={state} change={change} worker={worker} />}
+            {currentPage === 'taller' && (
+              <OperationsPage key={principal.role} state={state} change={change} worker={worker} />
+            )}
             {currentPage === 'inventario' && <InventoryPage state={state} change={change} />}
             {currentPage === 'compras' && <PurchasesPage state={state} change={change} />}
             {currentPage === 'facturacion' && <BillingPage state={state} change={change} />}
-            {(currentPage === 'gastos' || currentPage === 'contabilidad' || currentPage === 'informes') && (
+            {(currentPage === 'gastos' ||
+              currentPage === 'contabilidad' ||
+              currentPage === 'informes') && (
               <FinanceOverviewPage state={state} mode={currentPage} />
             )}
             {currentPage === 'actividad' && <ActivityPage state={state} />}
-            {currentPage === 'equipo' && <TeamPage key={principal.role} state={state} change={change} worker={worker} />}
-            <footer className="rr-footer">
-              Prototipo de demostración · Datos ficticios · Dictado según el navegador
-              {!worker && <button className="rr-reset-mobile" onClick={reset}>
-                Restablecer datos de ejemplo
-              </button>}
-            </footer>
+            {currentPage === 'equipo' && (
+              <TeamPage key={principal.role} state={state} change={change} worker={worker} />
+            )}
+            {!worker && (
+              <footer className="rr-footer">
+                <button className="rr-reset-mobile" onClick={reset}>
+                  Restablecer datos iniciales
+                </button>
+              </footer>
+            )}
           </main>
         </div>
+        <MobileNavigation
+          navigation={visibleNavigation}
+          page={currentPage}
+          state={state}
+          navigate={navigate}
+          changeProfile={changeProfile}
+        />
         <FloatingAssistant
           key={principal.role}
           state={state}

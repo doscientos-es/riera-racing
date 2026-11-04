@@ -43,8 +43,8 @@ export function ProjectsPage({
   const [creating, setCreating] = useState(false)
   const projects = budgetsOnly
     ? [...state.projects].sort(
-      (a, b) => Number(b.status === 'presupuesto') - Number(a.status === 'presupuesto'),
-    )
+        (a, b) => Number(b.status === 'presupuesto') - Number(a.status === 'presupuesto'),
+      )
     : state.projects
   const project = projects.find((item) => item.id === selected) ?? projects[0]
   const create = (event: FormEvent<HTMLFormElement>) => {
@@ -71,19 +71,13 @@ export function ProjectsPage({
     <div className="rr-stack">
       <div className="rr-heading">
         <div>
-          <span className="rr-eyebrow">DEL PRESUPUESTO A LA ENTREGA</span>
           <h1>{budgetsOnly ? 'Presupuestos' : 'Proyectos de taller'}</h1>
         </div>
         <Button aria-haspopup="dialog" aria-expanded={creating} onClick={() => setCreating(true)}>
           + Nuevo proyecto
         </Button>
       </div>
-      <FormDialog
-        open={creating}
-        onOpenChange={setCreating}
-        title="Nuevo proyecto"
-        description="Datos de ejemplo: no introduzcas información real."
-      >
+      <FormDialog open={creating} onOpenChange={setCreating} title="Nuevo proyecto">
         <form className="rr-form-grid" onSubmit={create}>
           <Field label="Cliente">
             <input name="client" required placeholder="Nombre del cliente" />
@@ -340,9 +334,7 @@ function ProjectDetail({
               Marcar trabajo terminado
             </Button>
           )}
-          <span className="rr-hint">
-            Aprobación registrada en esta demo; no se envía al cliente.
-          </span>
+          <span className="rr-hint">La aprobación se registra aquí; no se envía al cliente.</span>
         </div>
       </Section>
       <ProjectTasks project={project} state={state} change={change} />
@@ -406,7 +398,6 @@ function ProjectTasks({
   return (
     <Section
       title="Tareas del proyecto"
-      subtitle="Asignaciones de ejemplo para el equipo."
       action={
         <Button
           variant="outline"
