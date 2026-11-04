@@ -69,5 +69,5 @@ export function useSpeechRecognition(
     session.current = null
     setListening(false)
   }
-  return { supported, listening, error, start, stop, cancel }
+  return { supported, listening, error, clearError: () => setError(''), start, stop, cancel }
 }

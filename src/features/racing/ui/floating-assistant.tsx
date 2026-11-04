@@ -1,11 +1,13 @@
+import { Button } from '@doscientos/ui'
 import { ArrowUpRight, LoaderCircle, Mic, Sparkles, Square, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 import { applyAssistantProposal, type AssistantPrincipal } from '../application/assistant-access'
 import type { Proposal } from '../application/assistant-intent'
-import { prepareVoiceAction } from '../application/assistant-run'
+import { describeProposal, prepareVoiceAction } from '../application/assistant-run'
 import type { Workshop } from '../domain/model'
-import { today, uid, type Change } from './shared'
+import { AssistantForm } from './assistant-form'
+import { Field, FormDialog, today, uid, type Change } from './shared'
 import { useSpeechRecognition } from './use-speech-recognition'
 
 function TypedReply({ text }: { text: string }) {
@@ -36,17 +38,18 @@ export function FloatingAssistant({
   state,
   change,
   principal,
-  openAssistant,
 }: {
   state: Workshop
   change: Change
   principal: AssistantPrincipal
-  openAssistant: (text: string, proposal: Proposal | null) => void
 }) {
   const [open, setOpen] = useState(false)
   const [text, setText] = useState('')
   const [result, setResult] = useState('')
   const [proposal, setProposal] = useState<Proposal | null>(null)
+  const [reviewOpen, setReviewOpen] = useState(false)
+  const [textOpen, setTextOpen] = useState(false)
+  const [draft, setDraft] = useState('')
   const [processing, setProcessing] = useState(false)
   const pending = useRef<number | null>(null)
   const run = (transcript: string) => {
@@ -80,10 +83,12 @@ export function FloatingAssistant({
     pending.current = null
     setProcessing(false)
     cancel()
+    setReviewOpen(false)
+    setTextOpen(false)
     setOpen(false)
   }
   useEffect(() => {
-    if (!open) return
+    if (!open || reviewOpen || textOpen) return
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         if (pending.current !== null) window.clearTimeout(pending.current)
@@ -95,7 +100,7 @@ export function FloatingAssistant({
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [open, cancel])
+  }, [open, reviewOpen, textOpen, cancel])
   useEffect(
     () => () => {
       if (pending.current !== null) window.clearTimeout(pending.current)
@@ -163,17 +168,18 @@ export function FloatingAssistant({
                 <TypedReply text={reply} />
               </div>
             )}
-            {(proposal || speech.error || (reply && !speech.listening)) && (
+            {proposal && !speech.listening && !processing && (
               <button
                 type="button"
                 className="rr-voice-link"
-                onClick={() => {
-                  close()
-                  openAssistant(text, proposal)
-                }}
+                onClick={() => setReviewOpen(true)}
               >
-                {proposal ? 'Revisar acción' : 'Abrir asistente de texto'}{' '}
-                <ArrowUpRight size={16} />
+                Revisar acción <ArrowUpRight size={16} />
+              </button>
+            )}
+            {!speech.listening && !processing && (
+              <button type="button" className="rr-voice-link" onClick={() => { setDraft(text); setTextOpen(true) }}>
+                Escribir indicación <ArrowUpRight size={16} />
               </button>
             )}
           </div>
@@ -182,6 +188,37 @@ export function FloatingAssistant({
           </p>
         </section>
       )}
+      <FormDialog open={textOpen} onOpenChange={setTextOpen} title="Escribir indicación">
+        <form className="rr-stack" onSubmit={(event) => {
+          event.preventDefault()
+          const value = draft.trim()
+          if (!value) return
+          speech.clearError()
+          setResult('')
+          setProposal(null)
+          setTextOpen(false)
+          run(value)
+        }}>
+          <Field label="Indicación">
+            <textarea value={draft} onChange={(event) => setDraft(event.target.value)} rows={4} required />
+          </Field>
+          <Button type="submit" disabled={!draft.trim()}>Preparar acción</Button>
+        </form>
+      </FormDialog>
+      <FormDialog open={reviewOpen} onOpenChange={setReviewOpen} title="Revisar acción">
+        {proposal && <AssistantForm
+          proposal={proposal}
+          setProposal={setProposal}
+          state={state}
+          change={change}
+          principal={principal}
+          cancel={() => setReviewOpen(false)}
+          onSaved={() => {
+            setResult(`Hecho en la demo: ${describeProposal(proposal, state)}. Guardado en este navegador.`)
+            setProposal(null)
+          }}
+        />}
+      </FormDialog>
       <button
         type="button"
         className={`rr-voice-trigger${speech.listening ? ' is-listening' : ''}`}

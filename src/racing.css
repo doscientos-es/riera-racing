@@ -65,8 +65,8 @@ a:focus-visible {
 }
 .rr-login h1 {
   margin: 0;
-  font-size: 30px;
-  font-weight: 650;
+  font-size: 24px;
+  font-weight: 400;
   letter-spacing: -0.03em;
 }
 .rr-login-intro {
@@ -91,8 +91,8 @@ a:focus-visible {
 }
 .rr-login-card h2 {
   margin: 0;
-  font-size: 15px;
-  font-weight: 650;
+  font-size: 14px;
+  font-weight: 400;
 }
 .rr-login-card p {
   margin: 4px 0 0;
@@ -396,13 +396,12 @@ a:focus-visible {
   margin-bottom: 3px;
 }
 .rr-heading h1 {
-  font-size: clamp(24px, 2vw, 28px);
+  font-size: clamp(20px, 1.7vw, 22px);
   line-height: 1.15;
-  letter-spacing: -0.045em;
-  margin: 0 0 6px;
-  font-weight: 750;
+  letter-spacing: -0.025em;
+  margin: 0;
+  font-weight: 400;
 }
-.rr-heading p,
 .rr-card-head p {
   color: #777d78;
   font-size: 13px;
@@ -440,9 +439,9 @@ a:focus-visible {
 .rr-card h2,
 .rr-section-line h3 {
   margin: 0 0 5px;
-  font-size: 15px;
+  font-size: 14px;
   letter-spacing: -0.02em;
-  font-weight: 750;
+  font-weight: 400;
 }
 .rr-section-line {
   border-top: 1px solid #edf0ec;
@@ -526,7 +525,8 @@ a:focus-visible {
 }
 .rr-hero h2 {
   max-width: 520px;
-  font-size: 23px;
+  font-size: 20px;
+  font-weight: 400;
   line-height: 1.2;
   letter-spacing: -0.035em;
   margin: 10px 0;

@@ -64,7 +64,6 @@ export function AssistantPage({
         <div>
           <span className="rr-eyebrow">ASISTENCIA AL TALLER</span>
           <h1>Asistente con IA</h1>
-          <p>Dicta una acción, revisa los datos y confirma los cambios en la demo.</p>
         </div>
         <Badge tone="amber">Simulación</Badge>
       </div>

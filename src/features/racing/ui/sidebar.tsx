@@ -112,15 +112,17 @@ export function Sidebar({
         {visible.length === 0 && <p className="rr-sidebar-empty">No hay módulos que coincidan.</p>}
       </nav>
       <div className="rr-sidebar-footer">
-        <Button className="rr-sidebar-primary" onClick={() => navigate('presupuestos')}>
-          Ver presupuestos
+        <Button className="rr-sidebar-primary" onClick={() => navigate(principal.role === 'admin' ? 'presupuestos' : 'planificacion')}>
+          {principal.role === 'admin' ? 'Ver presupuestos' : 'Mis tareas'}
         </Button>
         <button type="button" className="rr-sidebar-reset" onClick={changeProfile}>
           Cambiar perfil
         </button>
-        <button type="button" className="rr-sidebar-reset" onClick={reset}>
-          Restablecer datos de ejemplo
-        </button>
+        {principal.role === 'admin' && (
+          <button type="button" className="rr-sidebar-reset" onClick={reset}>
+            Restablecer datos de ejemplo
+          </button>
+        )}
       </div>
     </aside>
   )

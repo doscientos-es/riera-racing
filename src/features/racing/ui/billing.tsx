@@ -60,7 +60,6 @@ export function BillingPage({ state, change }: { state: Workshop; change: Change
         <div>
           <span className="rr-eyebrow">CIERRE Y GESTORÍA</span>
           <h1>Facturación</h1>
-          <p>Prepara borradores a partir de los presupuestos aprobados.</p>
         </div>
         <div className="rr-actions">
           <Button variant="outline" disabled={!state.invoices.length} onClick={exportCsv}>

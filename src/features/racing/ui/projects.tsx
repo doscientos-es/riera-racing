@@ -43,8 +43,8 @@ export function ProjectsPage({
   const [creating, setCreating] = useState(false)
   const projects = budgetsOnly
     ? [...state.projects].sort(
-        (a, b) => Number(b.status === 'presupuesto') - Number(a.status === 'presupuesto'),
-      )
+      (a, b) => Number(b.status === 'presupuesto') - Number(a.status === 'presupuesto'),
+    )
     : state.projects
   const project = projects.find((item) => item.id === selected) ?? projects[0]
   const create = (event: FormEvent<HTMLFormElement>) => {
@@ -73,7 +73,6 @@ export function ProjectsPage({
         <div>
           <span className="rr-eyebrow">DEL PRESUPUESTO A LA ENTREGA</span>
           <h1>{budgetsOnly ? 'Presupuestos' : 'Proyectos de taller'}</h1>
-          <p>Cada vehículo, su presupuesto y el trabajo realizado en un solo lugar.</p>
         </div>
         <Button aria-haspopup="dialog" aria-expanded={creating} onClick={() => setCreating(true)}>
           + Nuevo proyecto

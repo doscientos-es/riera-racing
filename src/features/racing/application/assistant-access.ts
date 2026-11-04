@@ -1,6 +1,7 @@
 import type { Workshop } from '../domain/model'
 import { applyProposal } from './assistant-command'
 import type { ActionKind, Proposal } from './assistant-intent'
+import { isWorkerAssigned } from './worker-access'
 
 export type AssistantPrincipal = { role: 'admin' } | { role: 'worker'; name: string }
 export class AssistantAccessError extends Error {}
@@ -27,13 +28,7 @@ export function applyAssistantProposal(
       )
     if (proposal.kind === 'part') {
       const project = state.projects.find((item) => item.id === proposal.values.projectId)
-      const assigned =
-        project &&
-        (project.responsible === principal.name ||
-          state.tasks.some(
-            (task) => task.projectId === project.id && task.worker === principal.name,
-          ))
-      if (project && !assigned)
+      if (project && !isWorkerAssigned(state, principal.name, project.id))
         throw new AssistantAccessError(
           'El trabajador solo puede registrar partes en proyectos asignados.',
         )

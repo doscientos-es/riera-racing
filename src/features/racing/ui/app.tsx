@@ -1,5 +1,4 @@
 import {
-  Bot,
   Boxes,
   CalendarDays,
   ChartColumn,
@@ -18,15 +17,14 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { loadWorkshop, saveWorkshop, WORKSHOP_KEY } from '../api'
 import type { AssistantPrincipal } from '../application/assistant-access'
-import type { Proposal } from '../application/assistant-intent'
 import {
   DEMO_SESSION_KEY,
   isLoginScreen,
   readDemoPrincipal,
   saveDemoPrincipal,
 } from '../application/demo-session'
+import { canVisitPage, workerWorkshop } from '../application/worker-access'
 import type { Workshop } from '../domain/model'
-import { AssistantPage } from './assistant'
 import { BillingPage } from './billing'
 import { Dashboard, type Page } from './dashboard'
 import { FloatingAssistant } from './floating-assistant'
@@ -38,6 +36,7 @@ import { IncidentsPage, PlanningPage } from './planning'
 import { ProjectsPage } from './projects'
 import { FormErrorContext, type Change } from './shared'
 import { Sidebar, type NavigationItem } from './sidebar'
+import { WorkerDashboard, WorkerProjects } from './worker-pages'
 
 const navigation: NavigationItem[] = [
   { id: 'inicio', label: 'Inicio', icon: Gauge, group: 'Operativa' },
@@ -55,7 +54,6 @@ const navigation: NavigationItem[] = [
   { id: 'contabilidad', label: 'Contabilidad', icon: ChartColumn, group: 'Administración' },
   { id: 'informes', label: 'Informes', icon: ChartColumn, group: 'Administración' },
   { id: 'actividad', label: 'Actividad', icon: Clock3, group: 'Administración' },
-  { id: 'asistente', label: 'Asistente IA', icon: Bot, group: 'Herramientas' },
 ]
 
 type Loaded = { state: Workshop; error: null } | { state: null; error: string }
@@ -83,11 +81,6 @@ export function RacingApp() {
   const [loaded, setLoaded] = useState<Loaded>(read)
   const [page, setPage] = useState<Page>('inicio')
   const [selected, setSelected] = useState('')
-  const [assistantDraft, setAssistantDraft] = useState<{
-    id: string
-    text: string
-    proposal: Proposal | null
-  } | null>(null)
   const [message, setMessage] = useState('')
   const [formError, setFormError] = useState('')
   const clearFormError = useCallback(() => setFormError(''), [])
@@ -121,7 +114,6 @@ export function RacingApp() {
         }
         setPage('inicio')
         setSelected('')
-        setAssistantDraft(null)
       }
     }
     window.addEventListener('storage', onStorage)
@@ -137,7 +129,6 @@ export function RacingApp() {
       setLoaded(read())
       setSelected('')
       setPage('inicio')
-      setAssistantDraft(null)
       setMessage('Datos de ejemplo restablecidos.')
     } catch {
       setMessage('No se han podido restablecer los datos locales.')
@@ -184,7 +175,6 @@ export function RacingApp() {
       setPrincipal(readDemoPrincipal(window.localStorage))
       setPage('inicio')
       setSelected('')
-      setAssistantDraft(null)
       setMessage('')
       setFormError('')
       setLoginError('')
@@ -207,7 +197,19 @@ export function RacingApp() {
         <output>{message}</output>
       </main>
     )
-  const state = loaded.state
+  const worker = principal.role === 'worker' ? principal.name : undefined
+  const state = worker ? workerWorkshop(loaded.state, worker) : loaded.state
+  const visibleNavigation = navigation
+    .filter((item) => canVisitPage(principal, item.id))
+    .map((item) => worker && item.id === 'proyectos' ? { ...item, label: 'Mis proyectos' }
+      : worker && item.id === 'planificacion' ? { ...item, label: 'Mis tareas' }
+        : worker && item.id === 'taller' ? { ...item, label: 'Mis partes' }
+          : worker && item.id === 'equipo' ? { ...item, label: 'Mis vacaciones', group: 'Operativa' }
+            : item)
+  const currentPage = canVisitPage(principal, page) ? page : 'inicio'
+  const navigate = (next: Page) => {
+    if (canVisitPage(principal, next)) setPage(next)
+  }
   return (
     <FormErrorContext.Provider value={{ error: formError, clear: clearFormError }}>
       <div className="rr-app">
@@ -217,9 +219,9 @@ export function RacingApp() {
         <Sidebar
           state={state}
           principal={principal}
-          navigation={navigation}
-          page={page}
-          navigate={setPage}
+          navigation={visibleNavigation}
+          page={currentPage}
+          navigate={navigate}
           reset={reset}
           changeProfile={changeProfile}
         />
@@ -229,7 +231,7 @@ export function RacingApp() {
               <img className="rr-mobile-brand" src="/icon.png" alt="" />
               <span>Riera Racing</span>
               <span className="rr-top-divider">/</span>
-              <strong>{navigation.find((item) => item.id === page)?.label}</strong>
+              <strong>{visibleNavigation.find((item) => item.id === currentPage)?.label}</strong>
             </div>
             <div className="rr-top-session">
               <span className="rr-top-demo">
@@ -242,12 +244,12 @@ export function RacingApp() {
           </header>
           <main id="contenido" className="rr-content">
             <div className="rr-mobile-nav" aria-label="Secciones">
-              {navigation.map(({ id, label }) => (
+              {visibleNavigation.map(({ id, label }) => (
                 <button
                   key={id}
-                  className={page === id ? 'active' : ''}
-                  onClick={() => setPage(id)}
-                  aria-current={page === id ? 'page' : undefined}
+                  className={currentPage === id ? 'active' : ''}
+                  onClick={() => navigate(id)}
+                  aria-current={currentPage === id ? 'page' : undefined}
                 >
                   {label}
                 </button>
@@ -261,54 +263,45 @@ export function RacingApp() {
                 </button>
               </output>
             )}
-            {page === 'inicio' && (
-              <Dashboard state={state} navigate={setPage} select={setSelected} />
+            {currentPage === 'inicio' && (
+              worker ? <WorkerDashboard state={state} name={worker} navigate={navigate} /> : <Dashboard state={state} navigate={navigate} select={setSelected} />
             )}
-            {(page === 'proyectos' || page === 'presupuestos') && (
+            {worker && currentPage === 'proyectos' && <WorkerProjects state={state} />}
+            {!worker && (currentPage === 'proyectos' || currentPage === 'presupuestos') && (
               <ProjectsPage
-                key={page}
+                key={currentPage}
                 state={state}
                 change={change}
                 selected={selected}
                 select={setSelected}
-                budgetsOnly={page === 'presupuestos'}
+                budgetsOnly={currentPage === 'presupuestos'}
               />
             )}
-            {page === 'planificacion' && <PlanningPage state={state} change={change} />}
-            {page === 'incidencias' && <IncidentsPage state={state} change={change} />}
-            {page === 'clientes' && (
+            {currentPage === 'planificacion' && <PlanningPage key={principal.role} state={state} change={change} worker={worker} />}
+            {currentPage === 'incidencias' && <IncidentsPage key={principal.role} state={state} change={change} worker={worker} />}
+            {currentPage === 'clientes' && (
               <ClientsPage
                 state={state}
                 openProject={(id) => {
                   setSelected(id)
-                  setPage('proyectos')
+                  navigate('proyectos')
                 }}
               />
             )}
-            {page === 'taller' && <OperationsPage state={state} change={change} />}
-            {page === 'inventario' && <InventoryPage state={state} change={change} />}
-            {page === 'compras' && <PurchasesPage state={state} change={change} />}
-            {page === 'facturacion' && <BillingPage state={state} change={change} />}
-            {(page === 'gastos' || page === 'contabilidad' || page === 'informes') && (
-              <FinanceOverviewPage state={state} mode={page} />
+            {currentPage === 'taller' && <OperationsPage key={principal.role} state={state} change={change} worker={worker} />}
+            {currentPage === 'inventario' && <InventoryPage state={state} change={change} />}
+            {currentPage === 'compras' && <PurchasesPage state={state} change={change} />}
+            {currentPage === 'facturacion' && <BillingPage state={state} change={change} />}
+            {(currentPage === 'gastos' || currentPage === 'contabilidad' || currentPage === 'informes') && (
+              <FinanceOverviewPage state={state} mode={currentPage} />
             )}
-            {page === 'actividad' && <ActivityPage state={state} />}
-            {page === 'equipo' && <TeamPage state={state} change={change} />}
-            {page === 'asistente' && (
-              <AssistantPage
-                key={`${principal.role}-${assistantDraft?.id ?? ''}`}
-                state={state}
-                change={assistantChange}
-                principal={principal}
-                initialText={assistantDraft?.text}
-                initialProposal={assistantDraft?.proposal}
-              />
-            )}
+            {currentPage === 'actividad' && <ActivityPage state={state} />}
+            {currentPage === 'equipo' && <TeamPage key={principal.role} state={state} change={change} worker={worker} />}
             <footer className="rr-footer">
               Prototipo de demostración · Datos ficticios · Dictado según el navegador
-              <button className="rr-reset-mobile" onClick={reset}>
+              {!worker && <button className="rr-reset-mobile" onClick={reset}>
                 Restablecer datos de ejemplo
-              </button>
+              </button>}
             </footer>
           </main>
         </div>
@@ -317,10 +310,6 @@ export function RacingApp() {
           state={state}
           change={assistantChange}
           principal={principal}
-          openAssistant={(text, proposal) => {
-            setAssistantDraft({ id: crypto.randomUUID(), text, proposal })
-            setPage('asistente')
-          }}
         />
       </div>
     </FormErrorContext.Provider>

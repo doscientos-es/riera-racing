@@ -1,6 +1,7 @@
 import { Button } from '@doscientos/ui'
 import { useState, type FormEvent } from 'react'
 
+import { addWorkerAbsence, addWorkerPart } from '../application/worker-access'
 import type { Workshop } from '../domain/model'
 import { addAbsence, addPart } from '../domain/workshop'
 import {
@@ -18,7 +19,7 @@ import {
   type Change,
 } from './shared'
 
-export function OperationsPage({ state, change }: { state: Workshop; change: Change }) {
+export function OperationsPage({ state, change, worker }: { state: Workshop; change: Change; worker?: string | undefined }) {
   const [adding, setAdding] = useState(false)
   const [projectId, setProjectId] = useState('')
   const [productId, setProductId] = useState('')
@@ -27,20 +28,20 @@ export function OperationsPage({ state, change }: { state: Workshop; change: Cha
     event.preventDefault()
     const data = new FormData(event.currentTarget)
     if (
-      change((current) =>
-        addPart(current, {
+      change((current) => {
+        const part = {
           id: uid(),
           projectId,
           date: formText(data, 'date'),
-          worker: formText(data, 'worker').trim(),
           description: formText(data, 'description').trim(),
           hours: Number(data.get('hours')),
           hourlyCost: eurosToCents(formText(data, 'hourlyCost')),
           productId: productId || null,
           quantity: productId ? Number(data.get('quantity')) : 0,
           expense: eurosToCents(formText(data, 'expense')),
-        }),
-      )
+        }
+        return worker ? addWorkerPart(current, worker, part) : addPart(current, { ...part, worker: formText(data, 'worker').trim() })
+      })
     ) {
       setAdding(false)
       setProjectId('')
@@ -52,8 +53,7 @@ export function OperationsPage({ state, change }: { state: Workshop; change: Cha
       <div className="rr-heading">
         <div>
           <span className="rr-eyebrow">EL DÍA A DÍA DEL EQUIPO</span>
-          <h1>Partes de taller</h1>
-          <p>Registra intervenciones, horas, piezas y gastos por vehículo.</p>
+          <h1>{worker ? 'Mis partes' : 'Partes de taller'}</h1>
         </div>
         <Button aria-haspopup="dialog" aria-expanded={adding} onClick={() => setAdding(true)}>
           + Registrar parte
@@ -78,9 +78,9 @@ export function OperationsPage({ state, change }: { state: Workshop; change: Cha
           <Field label="Fecha">
             <input name="date" type="date" defaultValue={today()} required />
           </Field>
-          <Field label="Operario">
+          {!worker && <Field label="Operario">
             <input name="worker" placeholder="Nombre del operario" required />
-          </Field>
+          </Field>}
           <Field label="Intervención">
             <input name="description" placeholder="Trabajo realizado" required />
           </Field>
@@ -113,7 +113,7 @@ export function OperationsPage({ state, change }: { state: Workshop; change: Cha
       </FormDialog>
       <Section
         title="Últimas intervenciones"
-        subtitle="El coste incluye las horas, las piezas consumidas y otros gastos registrados."
+        subtitle={worker ? 'Tus partes registrados en proyectos asignados.' : 'El coste incluye las horas, las piezas consumidas y otros gastos registrados.'}
       >
         {state.parts.length ? (
           <div className="rr-list">
@@ -131,12 +131,12 @@ export function OperationsPage({ state, change }: { state: Workshop; change: Cha
                       {part.hours} h {product && `· ${part.quantity} × ${product.name}`}
                     </p>
                   </div>
-                  <Badge>
+                  {!worker && <Badge>
                     {money(
                       Math.round(part.hours * part.hourlyCost) + part.materialCost + part.expense,
                     )}{' '}
                     coste
-                  </Badge>
+                  </Badge>}
                 </div>
               )
             })}
@@ -149,23 +149,23 @@ export function OperationsPage({ state, change }: { state: Workshop; change: Cha
   )
 }
 
-export function TeamPage({ state, change }: { state: Workshop; change: Change }) {
+export function TeamPage({ state, change, worker }: { state: Workshop; change: Change; worker?: string | undefined }) {
   const [adding, setAdding] = useState(false)
   const save = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
-    const worker = formText(data, 'worker').trim()
     const from = formText(data, 'from')
     const to = formText(data, 'to')
-    if (change((current) => addAbsence(current, { id: uid(), worker, from, to }))) setAdding(false)
+    if (change((current) => worker
+      ? addWorkerAbsence(current, worker, { id: uid(), from, to })
+      : addAbsence(current, { id: uid(), worker: formText(data, 'worker').trim(), from, to }))) setAdding(false)
   }
   return (
     <div className="rr-stack">
       <div className="rr-heading">
         <div>
           <span className="rr-eyebrow">PERSONAS</span>
-          <h1>Equipo y vacaciones</h1>
-          <p>Un registro sencillo de ausencias para coordinar el taller.</p>
+          <h1>{worker ? 'Mis vacaciones' : 'Equipo y vacaciones'}</h1>
         </div>
         <Button aria-haspopup="dialog" aria-expanded={adding} onClick={() => setAdding(true)}>
           + Añadir vacaciones
@@ -173,9 +173,9 @@ export function TeamPage({ state, change }: { state: Workshop; change: Change })
       </div>
       <FormDialog open={adding} onOpenChange={setAdding} title="Registrar vacaciones">
         <form className="rr-form-grid" onSubmit={save}>
-          <Field label="Operario">
+          {!worker && <Field label="Operario">
             <input name="worker" required />
-          </Field>
+          </Field>}
           <Field label="Desde">
             <input name="from" type="date" required />
           </Field>

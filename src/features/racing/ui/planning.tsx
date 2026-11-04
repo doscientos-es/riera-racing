@@ -1,6 +1,7 @@
 import { Button } from '@doscientos/ui'
 import { useState, type FormEvent } from 'react'
 
+import { addWorkerIncident, setWorkerIncidentResolved, setWorkerTaskDone } from '../application/worker-access'
 import type { Workshop } from '../domain/model'
 import { addIncident, addTask } from '../domain/workshop'
 import {
@@ -16,7 +17,7 @@ import {
   type Change,
 } from './shared'
 
-export function PlanningPage({ state, change }: { state: Workshop; change: Change }) {
+export function PlanningPage({ state, change, worker }: { state: Workshop; change: Change; worker?: string | undefined }) {
   const [adding, setAdding] = useState(false)
   const [projectId, setProjectId] = useState('')
   const save = (event: FormEvent<HTMLFormElement>) => {
@@ -43,12 +44,11 @@ export function PlanningPage({ state, change }: { state: Workshop; change: Chang
     <div className="rr-stack">
       <div className="rr-heading">
         <div>
-          <h1>Planificación</h1>
-          <p>Tareas asignadas por vehículo y responsable.</p>
+          <h1>{worker ? 'Mis tareas' : 'Planificación'}</h1>
         </div>
-        <Button aria-haspopup="dialog" aria-expanded={adding} onClick={() => setAdding(true)}>
+        {!worker && <Button aria-haspopup="dialog" aria-expanded={adding} onClick={() => setAdding(true)}>
           + Asignar tarea
-        </Button>
+        </Button>}
       </div>
       <FormDialog
         open={adding}
@@ -73,7 +73,7 @@ export function PlanningPage({ state, change }: { state: Workshop; change: Chang
         </form>
       </FormDialog>
       <Section
-        title="Tareas del taller"
+        title={worker ? 'Tareas asignadas' : 'Tareas del taller'}
         subtitle="Marca los trabajos realizados; esta vista no programa fechas ni turnos."
       >
         {state.tasks.length ? (
@@ -88,12 +88,13 @@ export function PlanningPage({ state, change }: { state: Workshop; change: Chang
                       checked={task.done}
                       onChange={(event) => {
                         const done = event.target.checked
-                        change((current) => ({
-                          ...current,
-                          tasks: current.tasks.map((item) =>
-                            item.id === task.id ? { ...item, done } : item,
-                          ),
-                        }))
+                        change((current) => worker
+                          ? setWorkerTaskDone(current, worker, task.id, done)
+                          : {
+                            ...current, tasks: current.tasks.map((item) =>
+                              item.id === task.id ? { ...item, done } : item,
+                            )
+                          })
                       }}
                     />{' '}
                     <strong>{task.description}</strong>
@@ -112,7 +113,7 @@ export function PlanningPage({ state, change }: { state: Workshop; change: Chang
           <Empty>No hay tareas asignadas.</Empty>
         )}
       </Section>
-      <Section
+      {!worker && <Section
         title="Ausencias registradas"
         subtitle="Consulta las fechas antes de asignar tareas; no se comprueban automáticamente."
       >
@@ -130,12 +131,12 @@ export function PlanningPage({ state, change }: { state: Workshop; change: Chang
         ) : (
           <Empty>No hay ausencias registradas.</Empty>
         )}
-      </Section>
+      </Section>}
     </div>
   )
 }
 
-export function IncidentsPage({ state, change }: { state: Workshop; change: Change }) {
+export function IncidentsPage({ state, change, worker }: { state: Workshop; change: Change; worker?: string | undefined }) {
   const [adding, setAdding] = useState(false)
   const [projectId, setProjectId] = useState('')
   const save = (event: FormEvent<HTMLFormElement>) => {
@@ -143,15 +144,16 @@ export function IncidentsPage({ state, change }: { state: Workshop; change: Chan
     const form = event.currentTarget
     const data = new FormData(form)
     if (
-      change((current) =>
-        addIncident(current, {
+      change((current) => {
+        const incident = {
           id: uid(),
           projectId,
           date: formText(data, 'date'),
           description: formText(data, 'description').trim(),
           resolved: false,
-        }),
-      )
+        }
+        return worker ? addWorkerIncident(current, worker, incident) : addIncident(current, incident)
+      })
     ) {
       form.reset()
       setProjectId('')
@@ -163,7 +165,6 @@ export function IncidentsPage({ state, change }: { state: Workshop; change: Chan
       <div className="rr-heading">
         <div>
           <h1>Incidencias</h1>
-          <p>Seguimiento de imprevistos por vehículo.</p>
         </div>
         <Button aria-haspopup="dialog" aria-expanded={adding} onClick={() => setAdding(true)}>
           + Registrar incidencia
@@ -206,12 +207,13 @@ export function IncidentsPage({ state, change }: { state: Workshop; change: Chan
                   <Button
                     variant="outline"
                     onClick={() =>
-                      change((current) => ({
-                        ...current,
-                        incidents: current.incidents.map((item) =>
-                          item.id === incident.id ? { ...item, resolved: !item.resolved } : item,
-                        ),
-                      }))
+                      change((current) => worker
+                        ? setWorkerIncidentResolved(current, worker, incident.id, !incident.resolved)
+                        : {
+                          ...current, incidents: current.incidents.map((item) =>
+                            item.id === incident.id ? { ...item, resolved: !item.resolved } : item,
+                          )
+                        })
                     }
                   >
                     {incident.resolved ? 'Reabrir' : 'Resolver'}

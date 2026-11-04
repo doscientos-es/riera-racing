@@ -18,7 +18,6 @@ export function ClientsPage({
       <div className="rr-heading">
         <div>
           <h1>Clientes</h1>
-          <p>Vehículos y trabajos agrupados por cliente.</p>
         </div>
       </div>
       <Section
@@ -73,11 +72,6 @@ export function FinanceOverviewPage({
           <h1>
             {mode === 'gastos' ? 'Gastos' : mode === 'contabilidad' ? 'Contabilidad' : 'Informes'}
           </h1>
-          <p>
-            {mode === 'gastos'
-              ? 'Otros gastos registrados en los partes de taller.'
-              : 'Resumen de importes registrados en la demo.'}
-          </p>
         </div>
       </div>
       <div className="rr-notice">
@@ -183,7 +177,6 @@ export function ActivityPage({ state }: { state: Workshop }) {
       <div className="rr-heading">
         <div>
           <h1>Actividad</h1>
-          <p>Cambios realizados en esta demo desde la incorporación de este registro.</p>
         </div>
       </div>
       <Section

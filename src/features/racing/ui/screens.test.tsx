@@ -90,6 +90,15 @@ describe('pantallas de la demo de taller', () => {
     expect(finance).toContain('no son facturas emitidas')
   })
 
+  it('mantiene las cabeceras sin descripciones redundantes y conserva las advertencias', () => {
+    const planning = renderToStaticMarkup(<PlanningPage state={state} change={change} />)
+    const billing = renderToStaticMarkup(<BillingPage state={state} change={change} />)
+    expect(planning).toContain('Planificación')
+    expect(planning).not.toContain('Tareas asignadas por vehículo y responsable.')
+    expect(billing).not.toContain('Prepara borradores a partir de los presupuestos aprobados.')
+    expect(billing).toContain('no son facturas fiscales')
+  })
+
   it('ofrece acciones para abrir formularios sin mostrarlos de entrada', () => {
     const pages = [
       [

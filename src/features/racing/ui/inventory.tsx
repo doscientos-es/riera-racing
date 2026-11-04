@@ -44,7 +44,6 @@ export function InventoryPage({ state, change }: { state: Workshop; change: Chan
         <div>
           <span className="rr-eyebrow">PIEZAS Y CONSUMIBLES</span>
           <h1>Inventario</h1>
-          <p>Existencias, ubicación y coste de las piezas del taller.</p>
         </div>
         <Button aria-haspopup="dialog" aria-expanded={adding} onClick={() => setAdding(true)}>
           + Nueva pieza
@@ -148,7 +147,6 @@ export function PurchasesPage({ state, change }: { state: Workshop; change: Chan
         <div>
           <span className="rr-eyebrow">PROVEEDORES Y RECEPCIONES</span>
           <h1>Compras</h1>
-          <p>Pedidos vinculados a proyectos y comprobación de albaranes.</p>
         </div>
         <Button aria-haspopup="dialog" aria-expanded={adding} onClick={() => setAdding(true)}>
           + Nuevo pedido

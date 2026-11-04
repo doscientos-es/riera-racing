@@ -29,7 +29,7 @@ export function LoginPage({
                 <p>
                   {id === 'admin'
                     ? 'Presupuestos, planificación y gestión del taller.'
-                    : 'Partes y vacaciones del equipo.'}
+                    : 'Proyectos asignados, tareas, partes y vacaciones.'}
                 </p>
               </header>
               <button type="button" onClick={() => onSelect(id)} className="rr-login-user">
@@ -51,8 +51,8 @@ export function LoginPage({
           </p>
         )}
         <p className="rr-login-disclaimer">
-          Acceso simulado, sin contraseña ni seguridad real. El perfil limita las acciones del
-          asistente, pero no protege el resto de la aplicación.
+          Acceso simulado, sin contraseña ni seguridad real. Los perfiles adaptan la demo, pero no
+          protegen los datos almacenados en el navegador.
         </p>
       </div>
     </main>
