@@ -5,7 +5,8 @@ import { seedWorkshop } from '../api'
 import { AssistantPage } from './assistant'
 import { AssistantForm } from './assistant-form'
 import { BillingPage } from './billing'
-import { PurchasesPage } from './inventory'
+import { InventoryPage, PurchasesPage } from './inventory'
+import { OperationsPage, TeamPage } from './operations'
 import { ClientsPage, FinanceOverviewPage } from './overview-pages'
 import { IncidentsPage, PlanningPage } from './planning'
 import { ProjectsPage } from './projects'
@@ -43,6 +44,23 @@ describe('pantallas de la demo de taller', () => {
     expect(html).toContain('el archivo no se lee ni se sube')
   })
 
+  it('recibe la propuesta de voz para revisarla sin guardarla', () => {
+    const save = vi.fn(() => true)
+    const html = renderToStaticMarkup(
+      <AssistantPage
+        state={state}
+        change={save}
+        principal={{ role: 'admin' }}
+        initialText="Recibir pedido PED-001"
+        initialProposal={{ kind: 'receive', values: { purchaseId: 'o1', quantity: '1' } }}
+      />,
+    )
+    expect(html).toContain('Recibir pedido PED-001')
+    expect(html).toContain('Pedido de 2 unidades; se cerrará con 1')
+    expect(html).toContain('Confirmar y guardar')
+    expect(save).not.toHaveBeenCalled()
+  })
+
   it('muestra la diferencia de recepción antes de confirmar el cambio de stock', () => {
     const html = renderToStaticMarkup(
       <AssistantForm
@@ -70,5 +88,64 @@ describe('pantallas de la demo de taller', () => {
     expect(incidents).toContain('Registrar incidencia')
     expect(finance).toContain('cobros marcados son simulados')
     expect(finance).toContain('no son facturas emitidas')
+  })
+
+  it('ofrece acciones para abrir formularios sin mostrarlos de entrada', () => {
+    const pages = [
+      [
+        <PlanningPage key="planning" state={state} change={change} />,
+        'Asignar tarea',
+        'Añadir tarea',
+      ],
+      [
+        <IncidentsPage key="incidents" state={state} change={change} />,
+        'Registrar incidencia',
+        'Guardar incidencia',
+      ],
+      [
+        <InventoryPage key="inventory" state={state} change={change} />,
+        'Nueva pieza',
+        'Guardar pieza',
+      ],
+      [
+        <PurchasesPage key="purchases" state={state} change={change} />,
+        'Nuevo pedido',
+        'Crear pedido',
+      ],
+      [
+        <OperationsPage key="operations" state={state} change={change} />,
+        'Registrar parte',
+        'Guardar parte',
+      ],
+      [
+        <TeamPage key="team" state={state} change={change} />,
+        'Añadir vacaciones',
+        'Guardar vacaciones',
+      ],
+      [
+        <BillingPage key="billing" state={state} change={change} />,
+        'Preparar borrador',
+        'Crear borrador',
+      ],
+      [
+        <ProjectsPage
+          key="projects"
+          state={state}
+          change={change}
+          selected="p1"
+          select={vi.fn()}
+        />,
+        'Nuevo proyecto',
+        'Crear proyecto',
+      ],
+    ] as const
+
+    for (const [page, action, submit] of pages) {
+      const html = renderToStaticMarkup(page)
+      expect(html).toContain(action)
+      expect(html).toContain('aria-haspopup="dialog"')
+      expect(html).not.toContain(submit)
+      expect(html).not.toContain('<form')
+    }
   })
 })

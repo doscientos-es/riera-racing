@@ -46,7 +46,9 @@ export function InventoryPage({ state, change }: { state: Workshop; change: Chan
           <h1>Inventario</h1>
           <p>Existencias, ubicación y coste de las piezas del taller.</p>
         </div>
-        <Button onClick={() => setAdding(true)}>+ Nueva pieza</Button>
+        <Button aria-haspopup="dialog" aria-expanded={adding} onClick={() => setAdding(true)}>
+          + Nueva pieza
+        </Button>
       </div>
       <FormDialog open={adding} onOpenChange={setAdding} title="Nueva pieza">
         <form className="rr-form-grid" onSubmit={save}>
@@ -148,11 +150,16 @@ export function PurchasesPage({ state, change }: { state: Workshop; change: Chan
           <h1>Compras</h1>
           <p>Pedidos vinculados a proyectos y comprobación de albaranes.</p>
         </div>
-        <Button onClick={() => setAdding(true)}>+ Nuevo pedido</Button>
+        <Button aria-haspopup="dialog" aria-expanded={adding} onClick={() => setAdding(true)}>
+          + Nuevo pedido
+        </Button>
       </div>
       <FormDialog
         open={adding}
-        onOpenChange={setAdding}
+        onOpenChange={(open) => {
+          setAdding(open)
+          if (!open) setProjectId('')
+        }}
         title="Nuevo pedido"
         description="Registro interno de ejemplo; no se envía al proveedor."
       >
@@ -238,7 +245,12 @@ function PurchaseRow({
             {purchase.status}
           </Badge>
           {purchase.status === 'pendiente' && (
-            <Button variant="outline" onClick={() => setReceiving(true)}>
+            <Button
+              variant="outline"
+              aria-haspopup="dialog"
+              aria-expanded={receiving}
+              onClick={() => setReceiving(true)}
+            >
               Revisar recepción
             </Button>
           )}
@@ -246,7 +258,13 @@ function PurchaseRow({
       </div>
       <FormDialog
         open={receiving}
-        onOpenChange={setReceiving}
+        onOpenChange={(open) => {
+          setReceiving(open)
+          if (!open) {
+            setQuantity(String(purchase.quantity))
+            setConfirmed(false)
+          }
+        }}
         title={`Revisar recepción · ${purchase.reference}`}
       >
         <form

@@ -46,11 +46,16 @@ export function PlanningPage({ state, change }: { state: Workshop; change: Chang
           <h1>Planificación</h1>
           <p>Tareas asignadas por vehículo y responsable.</p>
         </div>
-        <Button onClick={() => setAdding(true)}>+ Asignar tarea</Button>
+        <Button aria-haspopup="dialog" aria-expanded={adding} onClick={() => setAdding(true)}>
+          + Asignar tarea
+        </Button>
       </div>
       <FormDialog
         open={adding}
-        onOpenChange={setAdding}
+        onOpenChange={(open) => {
+          setAdding(open)
+          if (!open) setProjectId('')
+        }}
         title="Asignar tarea"
         description="Las tareas también aparecen en el detalle del proyecto."
       >
@@ -160,9 +165,18 @@ export function IncidentsPage({ state, change }: { state: Workshop; change: Chan
           <h1>Incidencias</h1>
           <p>Seguimiento de imprevistos por vehículo.</p>
         </div>
-        <Button onClick={() => setAdding(true)}>+ Registrar incidencia</Button>
+        <Button aria-haspopup="dialog" aria-expanded={adding} onClick={() => setAdding(true)}>
+          + Registrar incidencia
+        </Button>
       </div>
-      <FormDialog open={adding} onOpenChange={setAdding} title="Registrar incidencia">
+      <FormDialog
+        open={adding}
+        onOpenChange={(open) => {
+          setAdding(open)
+          if (!open) setProjectId('')
+        }}
+        title="Registrar incidencia"
+      >
         <form className="rr-form-grid" onSubmit={save}>
           <Field label="Proyecto">
             <ProjectSelect projects={state.projects} value={projectId} onChange={setProjectId} />

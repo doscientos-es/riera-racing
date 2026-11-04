@@ -66,7 +66,9 @@ export function BillingPage({ state, change }: { state: Workshop; change: Change
           <Button variant="outline" disabled={!state.invoices.length} onClick={exportCsv}>
             Descargar CSV de ejemplo
           </Button>
-          <Button onClick={() => setAdding(true)}>+ Preparar borrador</Button>
+          <Button aria-haspopup="dialog" aria-expanded={adding} onClick={() => setAdding(true)}>
+            + Preparar borrador
+          </Button>
         </div>
       </div>
       <div className="rr-notice">
@@ -75,7 +77,10 @@ export function BillingPage({ state, change }: { state: Workshop; change: Change
       </div>
       <FormDialog
         open={adding}
-        onOpenChange={setAdding}
+        onOpenChange={(open) => {
+          setAdding(open)
+          if (!open) setProjectId('')
+        }}
         title="Preparar borrador"
         description="Se copian las líneas del presupuesto aprobado para su revisión."
       >

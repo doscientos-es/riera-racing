@@ -55,11 +55,19 @@ export function OperationsPage({ state, change }: { state: Workshop; change: Cha
           <h1>Partes de taller</h1>
           <p>Registra intervenciones, horas, piezas y gastos por vehículo.</p>
         </div>
-        <Button onClick={() => setAdding(true)}>+ Registrar parte</Button>
+        <Button aria-haspopup="dialog" aria-expanded={adding} onClick={() => setAdding(true)}>
+          + Registrar parte
+        </Button>
       </div>
       <FormDialog
         open={adding}
-        onOpenChange={setAdding}
+        onOpenChange={(open) => {
+          setAdding(open)
+          if (!open) {
+            setProjectId('')
+            setProductId('')
+          }
+        }}
         title="Nuevo parte"
         description="Las horas se imputan al proyecto; esto no es un sistema de fichaje laboral."
       >
@@ -159,7 +167,9 @@ export function TeamPage({ state, change }: { state: Workshop; change: Change })
           <h1>Equipo y vacaciones</h1>
           <p>Un registro sencillo de ausencias para coordinar el taller.</p>
         </div>
-        <Button onClick={() => setAdding(true)}>+ Añadir vacaciones</Button>
+        <Button aria-haspopup="dialog" aria-expanded={adding} onClick={() => setAdding(true)}>
+          + Añadir vacaciones
+        </Button>
       </div>
       <FormDialog open={adding} onOpenChange={setAdding} title="Registrar vacaciones">
         <form className="rr-form-grid" onSubmit={save}>

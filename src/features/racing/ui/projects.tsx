@@ -75,7 +75,9 @@ export function ProjectsPage({
           <h1>{budgetsOnly ? 'Presupuestos' : 'Proyectos de taller'}</h1>
           <p>Cada vehículo, su presupuesto y el trabajo realizado en un solo lugar.</p>
         </div>
-        <Button onClick={() => setCreating(true)}>+ Nuevo proyecto</Button>
+        <Button aria-haspopup="dialog" aria-expanded={creating} onClick={() => setCreating(true)}>
+          + Nuevo proyecto
+        </Button>
       </div>
       <FormDialog
         open={creating}
@@ -210,6 +212,8 @@ function ProjectDetail({
           {project.status === 'presupuesto' && (
             <Button
               variant="outline"
+              aria-haspopup="dialog"
+              aria-expanded={adding}
               onClick={() => {
                 setAdding(true)
                 setEditing(null)
@@ -249,6 +253,7 @@ function ProjectDetail({
                         <Button
                           variant="link"
                           size="sm"
+                          aria-haspopup="dialog"
                           onClick={() => {
                             setEditing(line.id)
                             setKind(line.kind)
@@ -404,7 +409,12 @@ function ProjectTasks({
       title="Tareas del proyecto"
       subtitle="Asignaciones de ejemplo para el equipo."
       action={
-        <Button variant="outline" onClick={() => setAdding(true)}>
+        <Button
+          variant="outline"
+          aria-haspopup="dialog"
+          aria-expanded={adding}
+          onClick={() => setAdding(true)}
+        >
           + Añadir tarea
         </Button>
       }

@@ -12,7 +12,7 @@ import type { Project, Workshop } from '../domain/model'
 export type Change = (command: (state: Workshop) => Workshop) => boolean
 export const FormErrorContext = createContext<{ error: string; clear: () => void }>({
   error: '',
-  clear: () => { },
+  clear: () => {},
 })
 
 export function FormDialog({

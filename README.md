@@ -6,6 +6,9 @@ datos reales ni usarlo para gestionar el taller de producción.
 
 ## Recorrido de demostración
 
+Al entrar, selecciona **Administración** o **Àlex Ferrer** en `/login`. El perfil se guarda
+en este navegador y puede cambiarse desde la aplicación sin borrar los datos del taller.
+
 1. En **Proyectos**, abrir un vehículo o crear uno y añadir o editar partidas del presupuesto.
 2. Aprobar el presupuesto, asignar tareas y registrar en **Partes de taller** horas, gastos y piezas.
 3. En **Inventario**, revisar existencias y ubicación. En **Compras**, recibir un pedido y confirmar cualquier diferencia; la recepción aumenta el stock una sola vez.
@@ -18,7 +21,7 @@ datos reales ni usarlo para gestionar el taller de producción.
 ## Límites
 
 - El asistente **no está conectado a IA**: usa reglas limitadas para detectar una acción por nota; no interpreta lenguaje libre. Permite proponer proyectos, partidas, aprobación y cierre, partes, tareas, pedidos, recepciones, borradores y vacaciones. El asistente flotante ejecuta automáticamente solo órdenes exactas de aprobación, cierre, borrador y determinados partes propios; las demás deben revisarse y confirmarse. Los datos no detectados deben completarse manualmente.
-- El selector de perfiles del asistente es una simulación local: administración puede usar todas las acciones; el trabajador de ejemplo solo puede registrar sus propios partes en proyectos asignados y sus vacaciones. No protege el resto de la aplicación ni sustituye autenticación o autorización en el servidor.
+- El acceso por perfiles es una simulación local: administración puede usar todas las acciones del asistente; el trabajador de ejemplo solo puede registrar sus propios partes en proyectos asignados y sus vacaciones. No protege el resto de la aplicación ni sustituye autenticación o autorización en el servidor.
 - El dictado usa el reconocimiento del navegador, si está disponible y con permiso de micrófono. Según el navegador, el audio puede enviarse a su proveedor; no utilizar datos reales. También se puede escribir. El ejemplo de PDF no lee, guarda ni sube el archivo.
 - Los presupuestos no se envían; la aprobación es local. Los borradores no son facturas fiscales y el cobro es simulado. El CSV es de ejemplo, no un formato validado por la asesoría.
 - No hay autenticación, permisos, datos compartidos, copias de seguridad, e-commerce, integraciones ni fichaje de jornada. Los pedidos no se envían al proveedor; solo admiten una pieza y una recepción cerrada.

@@ -24,13 +24,17 @@ export function AssistantPage({
   state,
   change,
   principal,
+  initialText = '',
+  initialProposal = null,
 }: {
   state: Workshop
   change: Change
   principal: AssistantPrincipal
+  initialText?: string
+  initialProposal?: Proposal | null
 }) {
-  const [text, setText] = useState('')
-  const [proposal, setProposal] = useState<Proposal | null>(null)
+  const [text, setText] = useState(initialText)
+  const [proposal, setProposal] = useState<Proposal | null>(initialProposal)
   const [error, setError] = useState('')
   const [fileName, setFileName] = useState('')
   const changeText = (value: string) => {
@@ -67,10 +71,8 @@ export function AssistantPage({
       <div className="rr-notice">
         <strong>Simulación sin IA.</strong> Reconoce frases sencillas, no entiende lenguaje libre.
         El dictado depende del navegador y puede enviar audio a su proveedor de reconocimiento. Usa
-        solo datos ficticios. Los cambios confirmados se guardan en este navegador. Perfil del
-        asistente:{' '}
-        {principal.role === 'admin' ? 'Administración' : `trabajador · ${principal.name}`}. Puedes
-        cambiarlo en el botón flotante; es una simulación, no un control de acceso real.
+        solo datos ficticios. Los cambios confirmados se guardan en este navegador. El perfil
+        elegido al entrar es simulado y no constituye un control de acceso real.
       </div>
       <Section
         title="Dicta o escribe una acción"

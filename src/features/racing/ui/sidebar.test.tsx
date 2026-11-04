@@ -26,12 +26,14 @@ describe('navegación lateral', () => {
         page="inicio"
         navigate={vi.fn()}
         reset={vi.fn()}
+        changeProfile={vi.fn()}
       />,
     )
     expect(html).toContain('aria-current="page"')
     expect(html).not.toContain('Proyectos terminados')
     expect(html).toContain('Buscar módulos')
     expect(html).toContain('Ver presupuestos')
+    expect(html).toContain('Cambiar perfil')
     expect(html).toContain('demo')
   })
 })

@@ -25,6 +25,7 @@ export function Sidebar({
   page,
   navigate,
   reset,
+  changeProfile,
 }: {
   state: Workshop
   principal: AssistantPrincipal
@@ -32,6 +33,7 @@ export function Sidebar({
   page: Page
   navigate: (page: Page) => void
   reset: () => void
+  changeProfile: () => void
 }) {
   const [query, setQuery] = useState('')
   const searchRef = useRef<HTMLInputElement>(null)
@@ -113,6 +115,9 @@ export function Sidebar({
         <Button className="rr-sidebar-primary" onClick={() => navigate('presupuestos')}>
           Ver presupuestos
         </Button>
+        <button type="button" className="rr-sidebar-reset" onClick={changeProfile}>
+          Cambiar perfil
+        </button>
         <button type="button" className="rr-sidebar-reset" onClick={reset}>
           Restablecer datos de ejemplo
         </button>
