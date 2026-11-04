@@ -28,8 +28,8 @@ import { OperationsPage, TeamPage } from './operations'
 import { ActivityPage, ClientsPage, FinanceOverviewPage } from './overview-pages'
 import { IncidentsPage, PlanningPage } from './planning'
 import { ProjectsPage } from './projects'
-import { Sidebar, type NavigationItem } from './sidebar'
 import type { Change } from './shared'
+import { Sidebar, type NavigationItem } from './sidebar'
 
 const navigation: NavigationItem[] = [
   { id: 'inicio', label: 'Inicio', icon: Gauge, group: 'Operativa' },
@@ -135,7 +135,14 @@ export function RacingApp() {
       <a className="rr-skip" href="#contenido">
         Saltar al contenido
       </a>
-      <Sidebar state={state} principal={principal} navigation={navigation} page={page} navigate={setPage} reset={reset} />
+      <Sidebar
+        state={state}
+        principal={principal}
+        navigation={navigation}
+        page={page}
+        navigate={setPage}
+        reset={reset}
+      />
       <div className="rr-main">
         <header className="rr-topbar">
           <div>
