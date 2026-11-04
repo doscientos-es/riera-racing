@@ -10,11 +10,12 @@ datos reales ni usarlo para gestionar el taller de producción.
 2. Aprobar el presupuesto, asignar tareas y registrar en **Partes de taller** horas, gastos y piezas.
 3. En **Inventario**, revisar existencias y ubicación. En **Compras**, recibir un pedido y confirmar cualquier diferencia; la recepción aumenta el stock una sola vez.
 4. Volver al proyecto para consultar los costes registrados y crear un borrador en **Facturación**.
-5. Consultar **Equipo** para vacaciones y **Asistente IA** para ver los ejemplos simulados de voz y documentos.
+5. En **Asistente IA**, dictar o escribir una de las frases de ejemplo, revisar la propuesta, completar los campos faltantes y confirmar. También se puede seleccionar una acción manualmente.
 
 ## Límites
 
-- El asistente muestra respuestas fijas: no graba voz ni lee, guarda o sube el PDF.
+- El asistente **no está conectado a IA**: usa reglas limitadas para detectar una acción por nota; no interpreta lenguaje libre. Permite proponer proyectos, partidas, aprobación y cierre, partes, tareas, pedidos, recepciones, borradores y vacaciones. No guarda hasta confirmar. Los importes y otros datos no detectados deben completarse manualmente.
+- El dictado usa el reconocimiento del navegador, si está disponible y con permiso de micrófono. Según el navegador, el audio puede enviarse a su proveedor; no utilizar datos reales. También se puede escribir. El ejemplo de PDF no lee, guarda ni sube el archivo.
 - Los presupuestos no se envían; la aprobación es local. Los borradores no son facturas fiscales y el cobro es simulado. El CSV es de ejemplo, no un formato validado por la asesoría.
 - No hay autenticación, permisos, datos compartidos, copias de seguridad, e-commerce, integraciones ni fichaje de jornada. Los pedidos no se envían al proveedor; solo admiten una pieza y una recepción cerrada.
 - El inventario no implementa reservas y los presupuestos no generan consumos automáticamente. El coste refleja únicamente los partes registrados, no un margen contable.

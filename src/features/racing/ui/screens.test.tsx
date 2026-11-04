@@ -35,6 +35,6 @@ describe('pantallas de la demo de taller', () => {
     expect(html).toContain('Simulación sin IA')
     expect(html).toContain('puede enviar audio')
     expect(html).toContain('Preparar propuesta')
-    expect(html).toContain('El archivo no se lee ni se sube')
+    expect(html).toContain('el archivo no se lee ni se sube')
   })
 })

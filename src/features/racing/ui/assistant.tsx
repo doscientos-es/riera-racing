@@ -68,7 +68,7 @@ export function AssistantPage({ state, change }: { state: Workshop; change: Chan
       {proposal && <AssistantForm proposal={proposal} setProposal={setProposal} state={state} change={change} cancel={() => setProposal(null)} />}
       <Section
         title="Lectura de albaranes y facturas"
-        subtitle="Ejemplo de revisión de un documento de proveedor."
+          subtitle="Ejemplo simulado: el archivo no se lee ni se sube."
       >
         <div className="rr-stack">
           <Field label="Seleccionar PDF de ejemplo">

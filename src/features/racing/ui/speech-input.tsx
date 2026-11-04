@@ -17,16 +17,20 @@ type SpeechWindow = Window & { SpeechRecognition?: new () => Recognition; webkit
 export function SpeechInput({ onText }: { onText: (text: string) => void }) {
   const recognition = useRef<Recognition | null>(null)
   const onTextRef = useRef(onText)
-  onTextRef.current = onText
   const [listening, setListening] = useState(false)
   const [error, setError] = useState('')
-  const [supported, setSupported] = useState(false)
+  const [supported] = useState(() => {
+    if (typeof window === 'undefined') return false
+    const speechWindow = window as SpeechWindow
+    return Boolean(speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition)
+  })
+
+  useEffect(() => { onTextRef.current = onText }, [onText])
 
   useEffect(() => {
     const speechWindow = window as SpeechWindow
     const Constructor = speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition
     if (!Constructor) return
-    setSupported(true)
     const instance = new Constructor()
     instance.lang = 'es-ES'
     instance.interimResults = false
@@ -67,7 +71,7 @@ export function SpeechInput({ onText }: { onText: (text: string) => void }) {
         <button type="button" className="rr-button rr-button-light" disabled={!supported} onClick={toggle}>
           {listening ? 'Detener dictado' : 'Dictar con el micrófono'}
         </button>
-        <span className="rr-hint" role="status">{listening ? 'Escuchando…' : supported ? 'Permiso de micrófono necesario.' : 'Dictado no disponible en este navegador; escribe la nota.'}</span>
+        <output className="rr-hint">{listening ? 'Escuchando…' : supported ? 'Permiso de micrófono necesario.' : 'Dictado no disponible en este navegador; escribe la nota.'}</output>
       </div>
       {error && <p className="rr-warning" role="alert">{error}</p>}
     </div>

@@ -26,19 +26,24 @@ function uniqueMention<T extends { id: string }>(text: string, items: T[], label
     const needle = normalize(label)
     return needle.length > 0 && haystack.includes(` ${needle} `)
   }))
-  return matches.length === 1 ? matches[0]!.id : ''
+  return matches.length === 1 ? (matches[0]?.id ?? '') : ''
 }
 
 function field(text: string, name: string): string {
   return text.match(new RegExp(`(?:^|[,;]\\s*)(?:${name})\\s*:?\\s*([^,;]+)`, 'i'))?.[1]?.trim() ?? ''
 }
 
+const numberPattern = '(\\d+(?:[.,]\\d+)?|cero|una|uno|un|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)'
+function numberField(text: string, name: string): string {
+  return text.match(new RegExp(`(?:^|[,;]\\s*)(?:${name})\\s*:?\\s*${numberPattern}(?=\\s*(?:;|,\\s+|$))`, 'i'))?.[1] ?? ''
+}
+
 /** Deliberately limited demo parser; ambiguous actions and entities are never guessed. */
 export function suggestAction(text: string, state: Workshop, date: string): Proposal | null {
   const normalized = normalize(text)
   const matches = ACTIONS.filter((action) => action.pattern.test(normalized))
-  if (matches.length !== 1) return null
-  const kind = matches[0]!.kind
+  if (matches.length !== 1 || !matches[0]) return null
+  const kind = matches[0].kind
   const values: Record<string, string> = {
     projectId: uniqueMention(text, state.projects, (item) => [item.reference, item.vehicle, item.plate]),
     productId: uniqueMention(text, state.products, (item) => [item.sku, item.name]),
@@ -54,13 +59,12 @@ export function suggestAction(text: string, state: Workshop, date: string): Prop
     supplier: field(text, 'proveedor'),
     kind: /\bmano de obra\b/.test(normalized) ? 'mano de obra' : '',
   }
-  const numberPattern = '(\\d+(?:[.,]\\d+)?|cero|un|una|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)'
   const hours = text.match(new RegExp(`\\b${numberPattern}\\s+horas?\\b`, 'i'))?.[1]
-  const quantity = field(text, 'cantidad') || text.match(new RegExp(`\\b${numberPattern}\\s+(?:unidades?|uds?)\\b`, 'i'))?.[1] || ''
+  const quantity = numberField(text, 'cantidad') || text.match(new RegExp(`\\b${numberPattern}\\s+(?:unidades?|uds?)\\b`, 'i'))?.[1] || ''
   values.hours = hours ? number(hours) : ''
   values.quantity = quantity ? number(quantity) : ''
-  values.price = number(field(text, 'precio'))
-  values.hourlyCost = number(field(text, 'coste por hora'))
-  values.expense = number(field(text, 'gastos'))
+  values.price = number(numberField(text, 'precio'))
+  values.hourlyCost = number(numberField(text, 'coste por hora'))
+  values.expense = number(numberField(text, 'gastos'))
   return { kind, values }
 }
