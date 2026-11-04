@@ -78,6 +78,7 @@ export interface Task {
   description: string
   worker: string
   done: boolean
+  date?: string
 }
 
 export interface Incident {

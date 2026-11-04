@@ -10,10 +10,21 @@ import {
   projectCosts,
   quoteTotal,
   receivePurchase,
+  scheduleTask,
   updateQuoteLine,
 } from './workshop'
 
 describe('recorrido del taller', () => {
+  it('programa y reprograma tareas sin modificar las demás', () => {
+    const state = seedWorkshop()
+    const scheduled = scheduleTask(state, 'k1', '2026-11-18')
+    expect(scheduled.tasks[0]?.date).toBe('2026-11-18')
+    expect(scheduled.tasks[1]).toEqual(state.tasks[1])
+    expect(scheduleTask(scheduled, 'k1', '').tasks[0]?.date).toBe('')
+    expect(() => scheduleTask(state, 'k1', '2026-02-30')).toThrow('fecha válida')
+    expect(() => scheduleTask(state, 'no-existe', '2026-11-18')).toThrow('Tarea no encontrada')
+    expect(state.tasks[0]?.date).toBeUndefined()
+  })
   it('conecta presupuesto, intervención, costes y borrador sin facturar dos veces', () => {
     let state = seedWorkshop()
     state = addProject(state, {

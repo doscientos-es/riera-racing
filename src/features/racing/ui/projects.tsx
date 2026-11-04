@@ -1,4 +1,5 @@
 import { Button } from '@doscientos/ui'
+import { ArrowLeft } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 
 import type { LineKind, Project, Workshop } from '../domain/model'
@@ -13,6 +14,7 @@ import {
   removeQuoteLine,
   updateQuoteLine,
 } from '../domain/workshop'
+import { ProjectList } from './project-list'
 import {
   Badge,
   Empty,
@@ -41,12 +43,7 @@ export function ProjectsPage({
   budgetsOnly?: boolean
 }) {
   const [creating, setCreating] = useState(false)
-  const projects = budgetsOnly
-    ? [...state.projects].sort(
-        (a, b) => Number(b.status === 'presupuesto') - Number(a.status === 'presupuesto'),
-      )
-    : state.projects
-  const project = projects.find((item) => item.id === selected) ?? projects[0]
+  const project = state.projects.find((item) => item.id === selected)
   const create = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
@@ -69,66 +66,60 @@ export function ProjectsPage({
   }
   return (
     <div className="rr-stack">
-      <div className="rr-heading">
-        <div>
-          <h1>{budgetsOnly ? 'Presupuestos' : 'Proyectos de taller'}</h1>
-        </div>
-        <Button aria-haspopup="dialog" aria-expanded={creating} onClick={() => setCreating(true)}>
-          + Nuevo proyecto
-        </Button>
-      </div>
-      <FormDialog open={creating} onOpenChange={setCreating} title="Nuevo proyecto">
-        <form className="rr-form-grid" onSubmit={create}>
-          <Field label="Cliente">
-            <input name="client" required placeholder="Nombre del cliente" />
-          </Field>
-          <Field label="Vehículo">
-            <input name="vehicle" required placeholder="Marca y modelo" />
-          </Field>
-          <Field label="Matrícula o referencia">
-            <input name="plate" required placeholder="Matrícula o referencia interna" />
-          </Field>
-          <Field label="Trabajo">
-            <input name="title" required placeholder="Preparación, revisión…" />
-          </Field>
-          <Field label="Responsable (opcional)">
-            <input name="responsible" placeholder="Operario responsable" />
-          </Field>
-          <Button type="submit">Crear proyecto</Button>
-        </form>
-      </FormDialog>
-      <div className="rr-project-layout">
-        <Section
-          title={budgetsOnly ? 'Presupuestos' : 'Proyectos'}
-          subtitle={`${projects.length} vehículos y trabajos`}
-        >
-          <div className="rr-project-list">
-            {projects.map((item) => (
-              <button
-                key={item.id}
-                className={`rr-project-item ${project?.id === item.id ? 'is-selected' : ''}`}
-                onClick={() => select(item.id)}
-              >
-                <span className="rr-project-top">
-                  <strong>{item.vehicle}</strong>
-                  <Status status={item.status} />
-                </span>
-                <span>
-                  {item.reference} · {item.plate}
-                </span>
-                <small>{item.title}</small>
-              </button>
-            ))}
+      <div className="rr-project-list-page" hidden={Boolean(selected)}>
+        <div className="rr-heading">
+          <div>
+            <h1>{budgetsOnly ? 'Presupuestos' : 'Proyectos de taller'}</h1>
           </div>
-        </Section>
-        {project ? (
-          <ProjectDetail key={project.id} project={project} state={state} change={change} />
-        ) : (
-          <Section title="Sin proyectos">
-            <Empty>Crea el primer proyecto para empezar.</Empty>
-          </Section>
-        )}
+          <Button aria-haspopup="dialog" aria-expanded={creating} onClick={() => setCreating(true)}>
+            + Nuevo proyecto
+          </Button>
+        </div>
+        <FormDialog open={creating} onOpenChange={setCreating} title="Nuevo proyecto">
+          <form className="rr-form-grid" onSubmit={create}>
+            <Field label="Cliente">
+              <input name="client" required placeholder="Nombre del cliente" />
+            </Field>
+            <Field label="Vehículo">
+              <input name="vehicle" required placeholder="Marca y modelo" />
+            </Field>
+            <Field label="Matrícula o referencia">
+              <input name="plate" required placeholder="Matrícula o referencia interna" />
+            </Field>
+            <Field label="Trabajo">
+              <input name="title" required placeholder="Preparación, revisión…" />
+            </Field>
+            <Field label="Responsable (opcional)">
+              <input name="responsible" placeholder="Operario responsable" />
+            </Field>
+            <Button type="submit">Crear proyecto</Button>
+          </form>
+        </FormDialog>
+        <ProjectList projects={state.projects} onOpen={select} budgetsOnly={budgetsOnly} />
       </div>
+      {selected && (
+        <div className="rr-stack">
+          <div className="rr-project-detail-heading">
+            <button type="button" className="rr-project-back" onClick={() => select('')}>
+              <ArrowLeft size={16} aria-hidden="true" />{' '}
+              {budgetsOnly ? 'Presupuestos' : 'Proyectos'}
+            </button>
+            {project && (
+              <div className="rr-heading">
+                <h1>{project.vehicle}</h1>
+                <Status status={project.status} />
+              </div>
+            )}
+          </div>
+          {project ? (
+            <ProjectDetail key={project.id} project={project} state={state} change={change} />
+          ) : (
+            <Section title="Proyecto no encontrado">
+              <Empty>El proyecto no está disponible.</Empty>
+            </Section>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -386,9 +377,17 @@ function ProjectTasks({
     const data = new FormData(form)
     const description = formText(data, 'task').trim()
     const worker = formText(data, 'worker').trim()
+    const date = formText(data, 'date')
     if (
       change((current) =>
-        addTask(current, { id: uid(), projectId: project.id, description, worker, done: false }),
+        addTask(current, {
+          id: uid(),
+          projectId: project.id,
+          description,
+          worker,
+          date,
+          done: false,
+        }),
       )
     ) {
       form.reset()
@@ -427,7 +426,10 @@ function ProjectTasks({
                   }
                 />{' '}
                 <strong>{task.description}</strong>
-                <p>{task.worker}</p>
+                <p>
+                  {task.worker}
+                  {task.date ? ` · ${task.date}` : ' · Sin fecha'}
+                </p>
               </span>
               <Badge tone={task.done ? 'green' : 'amber'}>
                 {task.done ? 'Completada' : 'Pendiente'}
@@ -445,6 +447,9 @@ function ProjectTasks({
           </Field>
           <Field label="Responsable">
             <input name="worker" required defaultValue={project.responsible ?? ''} />
+          </Field>
+          <Field label="Fecha (opcional)">
+            <input name="date" type="date" />
           </Field>
           <Button type="submit">Añadir tarea</Button>
         </form>

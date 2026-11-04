@@ -14,6 +14,11 @@ import type {
 const positive = (value: number) => Number.isFinite(value) && value > 0
 const nonnegative = (value: number) => Number.isFinite(value) && value >= 0
 const required = (value: string) => value.trim().length > 0
+const validTaskDate = (value: string) => {
+  if (!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(value)) return false
+  const date = new Date(`${value}T00:00:00Z`)
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
+}
 
 export function quoteTotal(lines: QuoteLine[]) {
   return lines.reduce((sum, line) => sum + Math.round(line.quantity * line.price), 0)
@@ -214,7 +219,17 @@ export function addTask(state: Workshop, task: Task): Workshop {
     throw new Error('Selecciona un proyecto existente.')
   if (!required(task.description) || !required(task.worker))
     throw new Error('Indica la tarea y su responsable.')
+  if (task.date && !validTaskDate(task.date)) throw new Error('Indica una fecha válida.')
   return { ...state, tasks: [...state.tasks, task] }
+}
+
+export function scheduleTask(state: Workshop, taskId: string, date: string): Workshop {
+  if (!state.tasks.some((task) => task.id === taskId)) throw new Error('Tarea no encontrada.')
+  if (date && !validTaskDate(date)) throw new Error('Indica una fecha válida.')
+  return {
+    ...state,
+    tasks: state.tasks.map((task) => (task.id === taskId ? { ...task, date } : task)),
+  }
 }
 
 export function addAbsence(state: Workshop, absence: Absence): Workshop {

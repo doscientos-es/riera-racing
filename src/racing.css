@@ -142,10 +142,6 @@ a:focus-visible {
 .rr-login-error {
   color: #a52620;
 }
-.rr-app {
-  min-height: 100vh;
-  display: flex;
-}
 .rr-skip {
   position: fixed;
   left: 12px;
@@ -410,17 +406,8 @@ a:focus-visible {
 .rr-profile-actions button:hover {
   background: #f4f5f7;
 }
-.rr-main {
-  min-width: 0;
-  flex: 1;
-}
 .rr-mobile-dock {
   display: none;
-}
-.rr-content {
-  max-width: 1500px;
-  padding: 28px 36px 24px;
-  margin: auto;
 }
 .rr-stack {
   display: grid;
@@ -714,6 +701,473 @@ a:focus-visible {
   justify-content: space-between;
   align-items: center;
   gap: 5px;
+}
+.rr-project-list-page:not([hidden]),
+.rr-projects-list {
+  display: grid;
+  gap: 20px;
+}
+.rr-project-filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.rr-project-filter-tabs {
+  display: flex;
+  min-width: 0;
+  max-width: 100%;
+  gap: 4px;
+  overflow-x: auto;
+  margin: 0;
+  padding: 4px;
+  border: 1px solid #e7e9e5;
+  border-radius: 9px;
+  background: #fff;
+}
+.rr-project-filter-tabs button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #6b736d;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.rr-project-filter-tabs button.is-active {
+  background: #f8ecea;
+  color: #a33b32;
+}
+.rr-project-filter-tabs button span,
+.rr-project-table-heading h2 span {
+  color: #929a93;
+  font-size: 11px;
+}
+.rr-project-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: min(100%, 300px);
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid #e1e5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #8c948d;
+}
+.rr-project-search:focus-within {
+  border-color: #b8645b;
+  box-shadow: 0 0 0 3px #b8645b20;
+}
+.rr-project-search input {
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #292f2a;
+  font-size: 12px;
+}
+.rr-project-table-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #e7e9e5;
+  border-radius: 10px;
+  background: #fff;
+}
+.rr-project-table-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 19px 20px;
+}
+.rr-project-table-heading h2 {
+  margin: 0;
+  color: #292f2a;
+  font-size: 14px;
+  font-weight: 400;
+}
+.rr-project-table-heading > span,
+.rr-project-pagination {
+  color: #858d86;
+  font-size: 11px;
+}
+.rr-project-table th:first-child,
+.rr-project-table td:first-child {
+  padding-left: 20px;
+}
+.rr-project-table tbody tr {
+  cursor: pointer;
+}
+.rr-project-table tbody tr:hover,
+.rr-project-table tbody tr:focus-within {
+  background: #faf7f6;
+}
+.rr-project-open {
+  display: grid;
+  gap: 5px;
+  width: 100%;
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+.rr-project-open strong {
+  color: #292f2a;
+  font-size: 13px;
+  font-weight: 600;
+}
+.rr-project-open > span:not(.rr-project-mobile-status) {
+  color: #858d86;
+  font-size: 11px;
+}
+.rr-project-mobile-status {
+  display: none;
+}
+.rr-project-amount {
+  text-align: right;
+}
+.rr-project-arrow-cell {
+  width: 44px;
+  color: #a4aaa4;
+}
+.rr-project-empty {
+  padding: 45px 20px;
+  border-top: 1px solid #eff1ee;
+  color: #858d86;
+  text-align: center;
+  font-size: 13px;
+}
+.rr-project-pagination {
+  padding: 16px 20px;
+}
+.rr-project-detail-heading {
+  display: grid;
+  gap: 18px;
+}
+.rr-project-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  justify-self: start;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: #777f78;
+  font-size: 12px;
+}
+.rr-project-back:hover {
+  color: #a33b32;
+}
+.rr-project-detail-info {
+  display: grid;
+  gap: 5px;
+  color: #858d86;
+  font-size: 12px;
+}
+.rr-project-detail-info strong {
+  color: #292f2a;
+  font-weight: 500;
+}
+.rr-planning {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.rr-planning-toolbar,
+.rr-planning-controls,
+.rr-planning-period,
+.rr-planning-nav,
+.rr-planning-worker-filter {
+  display: flex;
+  align-items: center;
+}
+.rr-planning-toolbar {
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.rr-planning-period {
+  gap: 12px;
+}
+.rr-planning-period-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid #f1dfdb;
+  border-radius: 12px;
+  background: #fbefed;
+  color: #ac4b40;
+}
+.rr-planning-period span {
+  color: #909791;
+  font-size: 11px;
+}
+.rr-planning-period h2 {
+  margin: 3px 0 0;
+  color: #252d28;
+  font-size: 16px;
+  font-weight: 400;
+  text-transform: capitalize;
+}
+.rr-planning-controls {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.rr-planning-worker-filter,
+.rr-planning-nav {
+  min-height: 40px;
+  border: 1px solid #e4e8e4;
+  border-radius: 9px;
+  background: #fff;
+  color: #626b64;
+}
+.rr-planning-worker-filter {
+  gap: 7px;
+  padding: 0 10px;
+}
+.rr-planning-worker-filter select {
+  max-width: 180px;
+  border: 0;
+  background: transparent;
+  color: #404a42;
+  font-size: 12px;
+}
+.rr-planning-nav {
+  overflow: hidden;
+}
+.rr-planning-nav button {
+  display: grid;
+  min-width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: #59635c;
+  font-size: 12px;
+}
+.rr-planning-nav button:hover {
+  background: #f8f3f2;
+  color: #a33b32;
+}
+.rr-planning-summary {
+  display: flex;
+  gap: 14px;
+  color: #89928a;
+  font-size: 11px;
+}
+.rr-planning-summary span + span::before {
+  margin-right: 14px;
+  color: #d2d8d2;
+  content: '·';
+}
+.rr-calendar-scroll {
+  min-width: 0;
+  overflow-x: auto;
+  border: 1px solid #e5e9e5;
+  border-radius: 12px;
+  background: #fff;
+}
+.rr-calendar-scroll-hint {
+  display: none;
+  margin: -5px 0 0;
+  color: #89928a;
+  font-size: 11px;
+}
+.rr-calendar {
+  min-width: 1120px;
+  table-layout: fixed;
+}
+.rr-calendar th,
+.rr-calendar td {
+  border-right: 1px solid #edf0ed;
+  border-bottom: 1px solid #edf0ed;
+}
+.rr-calendar thead th {
+  height: 76px;
+  padding: 12px;
+  background: #fbfcfb;
+  color: #929b93;
+  text-align: center;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.rr-calendar thead th:first-child {
+  width: 170px;
+  padding-left: 18px;
+  text-align: left;
+}
+.rr-calendar thead th:not(:first-child) span,
+.rr-calendar thead th strong,
+.rr-calendar thead th small {
+  display: block;
+}
+.rr-calendar thead th span {
+  font-size: 11px;
+  font-weight: 400;
+  text-transform: capitalize;
+}
+.rr-calendar thead th strong {
+  margin-top: 4px;
+  color: #343d36;
+  font-size: 18px;
+  font-weight: 400;
+}
+.rr-calendar thead th small {
+  color: #b54b40;
+  font-size: 9px;
+  font-weight: 500;
+}
+.rr-calendar th.is-today,
+.rr-calendar td.is-today {
+  background: #fef8f7;
+}
+.rr-calendar tbody th.rr-calendar-person {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  padding: 17px 12px;
+  background: #fff;
+  text-transform: none;
+  letter-spacing: 0;
+  vertical-align: top;
+}
+.rr-calendar-person > span:not(.rr-calendar-avatar) {
+  display: inline-grid;
+  max-width: 105px;
+  gap: 4px;
+  vertical-align: middle;
+}
+.rr-calendar-person strong {
+  overflow: hidden;
+  color: #333b35;
+  font-size: 12px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+}
+.rr-calendar-person small {
+  color: #929b93;
+  font-size: 10px;
+  font-weight: 400;
+}
+.rr-calendar-avatar {
+  display: inline-grid;
+  width: 32px;
+  height: 32px;
+  margin-right: 8px;
+  place-items: center;
+  border-radius: 10px;
+  background: #f4e8e5;
+  color: #a54b40;
+  font-size: 10px;
+  vertical-align: middle;
+}
+.rr-calendar td {
+  height: 150px;
+  padding: 8px;
+  vertical-align: top;
+  white-space: normal;
+}
+.rr-calendar-cell {
+  display: grid;
+  gap: 6px;
+}
+.rr-calendar-task {
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid #f1dbd7;
+  border-left: 3px solid #cb6c60;
+  border-radius: 7px;
+  background: #fff7f5;
+}
+.rr-calendar-task.is-done {
+  border-color: #dce9dd;
+  border-left-color: #7baf82;
+  background: #f5faf5;
+}
+.rr-calendar-task-label {
+  display: flex;
+  align-items: start;
+  gap: 6px;
+  color: #343c36;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.rr-calendar-task-label input {
+  flex: none;
+  margin: 2px 0 0;
+  accent-color: #b45348;
+}
+.rr-calendar-task.is-done .rr-calendar-task-label span {
+  color: #758378;
+  text-decoration: line-through;
+}
+.rr-calendar-task-meta {
+  margin: 6px 0 0 19px;
+  color: #89928a;
+  font-size: 10px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.rr-calendar-date {
+  display: block;
+  margin-top: 7px;
+}
+.rr-calendar-date input {
+  max-width: 100%;
+  min-width: 0;
+  padding: 3px;
+  border: 1px solid #eadedb;
+  border-radius: 4px;
+  background: #ffffffbf;
+  color: #747d75;
+  font-size: 10px;
+}
+.rr-calendar-absence {
+  padding: 7px 8px;
+  border: 1px solid #f1e4cc;
+  border-radius: 7px;
+  background: #fff9ed;
+  color: #a87d37;
+  font-size: 10px;
+}
+.rr-calendar-empty {
+  margin: 0;
+  padding: 28px;
+  color: #929b93;
+  text-align: center;
+  font-size: 12px;
+}
+.rr-unscheduled {
+  padding: 18px;
+  border: 1px solid #e5e9e5;
+  border-radius: 10px;
+  background: #fff;
+}
+.rr-unscheduled-head h2 {
+  margin: 0 0 14px;
+  color: #343d36;
+  font-size: 14px;
+  font-weight: 400;
+}
+.rr-unscheduled-head h2 span {
+  margin-left: 4px;
+  color: #a3aaa3;
+  font-size: 11px;
+}
+.rr-unscheduled-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 8px;
 }
 .rr-client {
   padding: 14px 0;
@@ -1109,17 +1563,6 @@ td small {
   }
 }
 /* ---------- Riera Racing home: calm SaaS workspace ---------- */
-.rr-dashboard {
-  display: grid;
-  gap: 20px;
-}
-.rr-dash-welcome {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 8px 2px 3px;
-}
 .rr-dash-kicker {
   display: flex;
   align-items: center;
@@ -1162,11 +1605,6 @@ td small {
   min-height: 40px;
   border-radius: 9px;
   box-shadow: 0 4px 10px #a32f261e;
-}
-.rr-dash-stats {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
 }
 .rr-dash-stat {
   position: relative;
@@ -1293,18 +1731,6 @@ td small {
   background: none;
   font-size: 10px;
   font-weight: 650;
-}
-.rr-dashboard-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.9fr);
-  gap: 16px;
-  align-items: start;
-}
-.rr-dash-main-column,
-.rr-dash-side-column {
-  display: grid;
-  gap: 16px;
-  min-width: 0;
 }
 .rr-dashboard .rr-card {
   padding: 19px;
@@ -1670,12 +2096,6 @@ td small {
   line-height: 1.45;
 }
 @media (max-width: 1100px) {
-  .rr-dashboard-grid {
-    grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
-  }
-  .rr-content {
-    padding: 30px 24px;
-  }
   .rr-project-layout {
     grid-template-columns: 1fr;
   }
@@ -1690,24 +2110,26 @@ td small {
   }
 }
 @media (max-width: 760px) {
-  .rr-dash-welcome {
-    align-items: start;
-    flex-direction: column;
+  .rr-calendar-scroll-hint {
+    display: block;
   }
-  .rr-dash-stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+  .rr-project-search {
+    width: 100%;
+  }
+  .rr-project-secondary {
+    display: none;
+  }
+  .rr-project-mobile-status {
+    display: block;
+    margin-top: 3px;
+  }
+  .rr-project-open > span:not(.rr-project-mobile-status) {
+    white-space: normal;
+    line-height: 1.5;
   }
   .rr-dash-stat {
     min-height: 142px;
     padding: 14px;
-  }
-  .rr-dashboard-grid {
-    grid-template-columns: 1fr;
-  }
-  .rr-dash-main-column,
-  .rr-dash-side-column {
-    gap: 12px;
   }
   .rr-project-meta {
     display: none;
@@ -1726,9 +2148,6 @@ td small {
   }
   .rr-reset-mobile {
     display: block;
-  }
-  .rr-content {
-    padding: 20px 16px;
   }
   .rr-mobile-dock {
     position: fixed;
@@ -1921,9 +2340,6 @@ td small {
       transform: translateY(0);
       opacity: 1;
     }
-  }
-  .rr-content {
-    padding-bottom: calc(82px + max(10px, env(safe-area-inset-bottom)));
   }
   .rr-voice-trigger {
     bottom: calc(66px + max(10px, env(safe-area-inset-bottom)));

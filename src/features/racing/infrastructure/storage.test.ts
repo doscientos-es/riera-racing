@@ -24,11 +24,13 @@ describe('almacenamiento local de la demo', () => {
       },
     ]
     state.activity = [{ id: 'a1', at: '2026-11-01T10:00:00Z', description: 'Cambios guardados' }]
+    state.tasks = state.tasks.map((task) => ({ ...task, date: '2026-11-18' }))
     saveWorkshop(storage, state)
     expect(values.has(WORKSHOP_KEY)).toBe(true)
     expect(loadWorkshop(storage).projects[0]?.title).toBe('Cambio guardado')
     expect(loadWorkshop(storage).incidents).toEqual(state.incidents)
     expect(loadWorkshop(storage).activity).toEqual(state.activity)
+    expect(loadWorkshop(storage).tasks).toEqual(state.tasks)
   })
 
   it('no sustituye silenciosamente datos corruptos', () => {

@@ -1,13 +1,11 @@
 import { Button } from '@doscientos/ui'
 import { useState, type FormEvent } from 'react'
 
-import {
-  addWorkerIncident,
-  setWorkerIncidentResolved,
-  setWorkerTaskDone,
-} from '../application/worker-access'
+import { localDate } from '../application/planning-calendar'
+import { addWorkerIncident, setWorkerIncidentResolved } from '../application/worker-access'
 import type { Workshop } from '../domain/model'
 import { addIncident, addTask } from '../domain/workshop'
+import { PlanningCalendar } from './planning-calendar'
 import {
   Badge,
   Empty,
@@ -43,6 +41,7 @@ export function PlanningPage({
           projectId,
           description: formText(data, 'description').trim(),
           worker: formText(data, 'worker').trim(),
+          date: formText(data, 'date'),
           done: false,
         }),
       )
@@ -83,74 +82,13 @@ export function PlanningPage({
           <Field label="Responsable">
             <input name="worker" required />
           </Field>
+          <Field label="Fecha">
+            <input name="date" type="date" defaultValue={localDate(new Date())} required />
+          </Field>
           <Button type="submit">Añadir tarea</Button>
         </form>
       </FormDialog>
-      <Section
-        title={worker ? 'Tareas asignadas' : 'Tareas del taller'}
-        subtitle="Marca los trabajos realizados; esta vista no programa fechas ni turnos."
-      >
-        {state.tasks.length ? (
-          <div className="rr-list">
-            {state.tasks.map((task) => {
-              const project = state.projects.find((item) => item.id === task.projectId)
-              return (
-                <label className="rr-list-row" key={task.id}>
-                  <span>
-                    <input
-                      type="checkbox"
-                      checked={task.done}
-                      onChange={(event) => {
-                        const done = event.target.checked
-                        change((current) =>
-                          worker
-                            ? setWorkerTaskDone(current, worker, task.id, done)
-                            : {
-                                ...current,
-                                tasks: current.tasks.map((item) =>
-                                  item.id === task.id ? { ...item, done } : item,
-                                ),
-                              },
-                        )
-                      }}
-                    />{' '}
-                    <strong>{task.description}</strong>
-                    <p>
-                      {project?.reference} · {project?.vehicle} · {task.worker}
-                    </p>
-                  </span>
-                  <Badge tone={task.done ? 'green' : 'amber'}>
-                    {task.done ? 'Completada' : 'Pendiente'}
-                  </Badge>
-                </label>
-              )
-            })}
-          </div>
-        ) : (
-          <Empty>No hay tareas asignadas.</Empty>
-        )}
-      </Section>
-      {!worker && (
-        <Section
-          title="Ausencias registradas"
-          subtitle="Consulta las fechas antes de asignar tareas; no se comprueban automáticamente."
-        >
-          {state.absences.length ? (
-            <div className="rr-list">
-              {state.absences.map((absence) => (
-                <div className="rr-list-row" key={absence.id}>
-                  <strong>{absence.worker}</strong>
-                  <span>
-                    {absence.from} → {absence.to}
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <Empty>No hay ausencias registradas.</Empty>
-          )}
-        </Section>
-      )}
+      <PlanningCalendar state={state} change={change} worker={worker} />
     </div>
   )
 }

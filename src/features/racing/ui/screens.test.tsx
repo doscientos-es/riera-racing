@@ -109,13 +109,7 @@ describe('pantallas de la demo de taller', () => {
         'Crear borrador',
       ],
       [
-        <ProjectsPage
-          key="projects"
-          state={state}
-          change={change}
-          selected="p1"
-          select={vi.fn()}
-        />,
+        <ProjectsPage key="projects" state={state} change={change} selected="" select={vi.fn()} />,
         'Nuevo proyecto',
         'Crear proyecto',
       ],

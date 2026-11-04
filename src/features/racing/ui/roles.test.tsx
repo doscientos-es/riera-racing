@@ -51,13 +51,31 @@ describe('navegación por perfil', () => {
     const worker = 'Àlex Ferrer'
     const state = workerWorkshop(seedWorkshop(), worker)
     const change = vi.fn(() => true)
-    const projects = renderToStaticMarkup(<WorkerProjects state={state} />)
-    const tasks = renderToStaticMarkup(<PlanningPage state={state} change={change} worker={worker} />)
-    const parts = renderToStaticMarkup(<OperationsPage state={state} change={change} worker={worker} />)
-    const absences = renderToStaticMarkup(<TeamPage state={state} change={change} worker={worker} />)
+    const projects = renderToStaticMarkup(
+      <WorkerProjects state={state} selected="" select={vi.fn()} />,
+    )
+    const detail = renderToStaticMarkup(
+      <WorkerProjects state={state} selected="p1" select={vi.fn()} />,
+    )
+    const unavailable = renderToStaticMarkup(
+      <WorkerProjects state={state} selected="p2" select={vi.fn()} />,
+    )
+    const tasks = renderToStaticMarkup(
+      <PlanningPage state={state} change={change} worker={worker} />,
+    )
+    const parts = renderToStaticMarkup(
+      <OperationsPage state={state} change={change} worker={worker} />,
+    )
+    const absences = renderToStaticMarkup(
+      <TeamPage state={state} change={change} worker={worker} />,
+    )
     expect(projects).toContain('BMW M3 E36')
     expect(projects).not.toContain('Porsche 911 GT3')
-    expect(projects).not.toContain('Presupuesto')
+    expect(projects).not.toContain('rr-project-amount')
+    expect(detail).toContain('Montar el kit de frenos')
+    expect(detail).not.toContain('Coste registrado')
+    expect(unavailable).toContain('Proyecto no encontrado')
+    expect(unavailable).not.toContain('Porsche 911 GT3')
     expect(tasks).toContain('Montar el kit de frenos')
     expect(tasks).not.toContain('Asignar tarea')
     expect(tasks).not.toContain('Ausencias registradas')

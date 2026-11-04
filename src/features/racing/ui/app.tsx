@@ -35,6 +35,7 @@ import { OperationsPage, TeamPage } from './operations'
 import { ActivityPage, ClientsPage, FinanceOverviewPage } from './overview-pages'
 import { IncidentsPage, PlanningPage } from './planning'
 import { ProjectsPage } from './projects'
+import { racingPath, readRacingRoute } from './racing-route'
 import { FormErrorContext, type Change } from './shared'
 import { Sidebar, type NavigationItem } from './sidebar'
 import { WorkerDashboard, WorkerProjects } from './worker-pages'
@@ -80,14 +81,16 @@ function readPrincipal(): AssistantPrincipal | null {
 
 export function RacingApp() {
   const [loaded, setLoaded] = useState<Loaded>(read)
-  const [page, setPage] = useState<Page>('inicio')
-  const [selected, setSelected] = useState('')
   const [message, setMessage] = useState('')
   const [formError, setFormError] = useState('')
   const clearFormError = useCallback(() => setFormError(''), [])
   const [principal, setPrincipal] = useState<AssistantPrincipal | null>(readPrincipal)
   const [pathname, setPathname] = useState(() => (principal ? window.location.pathname : '/login'))
   const [loginError, setLoginError] = useState('')
+  const { page, projectId: selected } = readRacingRoute(
+    pathname,
+    navigation.map((item) => item.id),
+  )
   useEffect(() => {
     const onPopState = () => {
       if (!principal && window.location.pathname !== '/login') {
@@ -113,8 +116,10 @@ export function RacingApp() {
           window.history.replaceState(null, '', '/login')
           setPathname('/login')
         }
-        setPage('inicio')
-        setSelected('')
+        if (next) {
+          window.history.replaceState(null, '', '/')
+          setPathname('/')
+        }
       }
     }
     window.addEventListener('storage', onStorage)
@@ -130,8 +135,8 @@ export function RacingApp() {
     try {
       window.localStorage.removeItem(WORKSHOP_KEY)
       setLoaded(read())
-      setSelected('')
-      setPage('inicio')
+      window.history.replaceState(null, '', '/')
+      setPathname('/')
       setMessage('Datos iniciales restablecidos.')
     } catch {
       setMessage('No se han podido restablecer los datos locales.')
@@ -176,8 +181,6 @@ export function RacingApp() {
     try {
       saveDemoPrincipal(window.localStorage, id)
       setPrincipal(readDemoPrincipal(window.localStorage))
-      setPage('inicio')
-      setSelected('')
       setMessage('')
       setFormError('')
       setLoginError('')
@@ -216,8 +219,16 @@ export function RacingApp() {
               : item,
     )
   const currentPage = canVisitPage(principal, page) ? page : 'inicio'
+  const go = (path: string) => {
+    if (window.location.pathname === path) return
+    window.history.pushState(null, '', path)
+    setPathname(path)
+  }
   const navigate = (next: Page) => {
-    if (canVisitPage(principal, next)) setPage(next)
+    if (canVisitPage(principal, next)) go(racingPath(next))
+  }
+  const selectProject = (id: string, target: 'proyectos' | 'presupuestos' = 'proyectos') => {
+    if (canVisitPage(principal, target)) go(racingPath(target, id))
   }
   return (
     <FormErrorContext.Provider value={{ error: formError, clear: clearFormError }}>
@@ -248,16 +259,18 @@ export function RacingApp() {
               (worker ? (
                 <WorkerDashboard state={state} name={worker} navigate={navigate} />
               ) : (
-                <Dashboard state={state} navigate={navigate} select={setSelected} />
+                <Dashboard state={state} navigate={navigate} openProject={selectProject} />
               ))}
-            {worker && currentPage === 'proyectos' && <WorkerProjects state={state} />}
+            {worker && currentPage === 'proyectos' && (
+              <WorkerProjects state={state} selected={selected} select={selectProject} />
+            )}
             {!worker && (currentPage === 'proyectos' || currentPage === 'presupuestos') && (
               <ProjectsPage
                 key={currentPage}
                 state={state}
                 change={change}
                 selected={selected}
-                select={setSelected}
+                select={(id) => selectProject(id, currentPage)}
                 budgetsOnly={currentPage === 'presupuestos'}
               />
             )}
@@ -268,13 +281,7 @@ export function RacingApp() {
               <IncidentsPage key={principal.role} state={state} change={change} worker={worker} />
             )}
             {currentPage === 'clientes' && (
-              <ClientsPage
-                state={state}
-                openProject={(id) => {
-                  setSelected(id)
-                  navigate('proyectos')
-                }}
-              />
+              <ClientsPage state={state} openProject={selectProject} />
             )}
             {currentPage === 'taller' && (
               <OperationsPage key={principal.role} state={state} change={change} worker={worker} />

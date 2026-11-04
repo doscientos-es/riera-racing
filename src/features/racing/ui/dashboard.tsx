@@ -35,11 +35,11 @@ export type Page =
 export function Dashboard({
   state,
   navigate,
-  select,
+  openProject,
 }: {
   state: Workshop
   navigate: (page: Page) => void
-  select: (id: string) => void
+  openProject: (id: string) => void
 }) {
   const active = state.projects.filter((project) => project.status === 'en taller')
   const budgets = state.projects.filter((project) => project.status === 'presupuesto')
@@ -50,15 +50,18 @@ export function Dashboard({
   const openInvoices = state.invoices.filter((invoice) => !invoice.paid)
   const attentionCount = lowStock.length + pending.length + openTasks.length + incidents.length
   return (
-    <div className="rr-dashboard">
-      <header className="rr-dash-welcome">
+    <div className="grid gap-5">
+      <header className="flex flex-col items-start justify-between gap-5 px-0.5 pt-2 min-[761px]:flex-row min-[761px]:items-end">
         <h1>Resumen</h1>
         <Button onClick={() => navigate('presupuestos')}>
           <Plus size={16} /> Nuevo presupuesto
         </Button>
       </header>
 
-      <section className="rr-dash-stats" aria-label="Resumen del taller">
+      <section
+        className="grid grid-cols-2 gap-3.5 min-[761px]:grid-cols-4"
+        aria-label="Resumen del taller"
+      >
         <article className="rr-dash-stat rr-dash-stat-featured">
           <div className="rr-dash-stat-top">
             <span>En taller</span>
@@ -115,8 +118,8 @@ export function Dashboard({
         </article>
       </section>
 
-      <div className="rr-dashboard-grid">
-        <div className="rr-dash-main-column">
+      <div className="grid grid-cols-1 items-start gap-4 min-[761px]:grid-cols-[minmax(0,1.2fr)_minmax(260px,.8fr)] min-[1101px]:grid-cols-[minmax(0,1.65fr)_minmax(280px,.9fr)]">
+        <div className="grid min-w-0 gap-4">
           <Section
             title="Proyectos en marcha"
             action={
@@ -138,10 +141,7 @@ export function Dashboard({
                     <button
                       className="rr-dash-project"
                       key={project.id}
-                      onClick={() => {
-                        select(project.id)
-                        navigate('proyectos')
-                      }}
+                      onClick={() => openProject(project.id)}
                     >
                       <span className={`rr-project-avatar rr-project-avatar-${index % 4}`}>
                         {project.vehicle
@@ -228,7 +228,7 @@ export function Dashboard({
           </Section>
         </div>
 
-        <aside className="rr-dash-side-column">
+        <aside className="grid min-w-0 gap-4">
           <Section
             title="Para hoy"
             action={<span className="rr-attention-count">{attentionCount}</span>}

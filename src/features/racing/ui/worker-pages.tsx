@@ -1,7 +1,9 @@
 import { Button } from '@doscientos/ui'
+import { ArrowLeft } from 'lucide-react'
 
 import type { Workshop } from '../domain/model'
 import type { Page } from './dashboard'
+import { ProjectList } from './project-list'
 import { Badge, Empty, Section, Status } from './shared'
 
 export function WorkerDashboard({
@@ -68,31 +70,90 @@ export function WorkerDashboard({
   )
 }
 
-export function WorkerProjects({ state }: { state: Workshop }) {
+export function WorkerProjects({
+  state,
+  selected,
+  select,
+}: {
+  state: Workshop
+  selected: string
+  select: (id: string) => void
+}) {
+  const project = state.projects.find((item) => item.id === selected)
+  const tasks = state.tasks.filter((task) => task.projectId === selected)
+  const incidents = state.incidents.filter((incident) => incident.projectId === selected)
   return (
     <div className="rr-stack">
-      <div className="rr-heading">
-        <h1>Mis proyectos</h1>
+      <div className="rr-project-list-page" hidden={Boolean(selected)}>
+        <div className="rr-heading">
+          <h1>Mis proyectos</h1>
+        </div>
+        <ProjectList projects={state.projects} onOpen={select} worker />
       </div>
-      <Section title="Vehículos asignados">
-        {state.projects.length ? (
-          <div className="rr-list">
-            {state.projects.map((project) => (
-              <div className="rr-list-row" key={project.id}>
-                <div>
-                  <strong>{project.vehicle}</strong>
-                  <p>
-                    {project.reference} · {project.title} · {project.plate}
-                  </p>
-                </div>
+      {selected && (
+        <div className="rr-stack">
+          <div className="rr-project-detail-heading">
+            <button type="button" className="rr-project-back" onClick={() => select('')}>
+              <ArrowLeft size={16} aria-hidden="true" /> Mis proyectos
+            </button>
+            {project && (
+              <div className="rr-heading">
+                <h1>{project.vehicle}</h1>
                 <Status status={project.status} />
               </div>
-            ))}
+            )}
           </div>
-        ) : (
-          <Empty>No tienes proyectos asignados.</Empty>
-        )}
-      </Section>
+          {project ? (
+            <>
+              <Section title={project.title} subtitle={`${project.reference} · ${project.plate}`}>
+                <div className="rr-project-detail-info">
+                  <span>Responsable</span>
+                  <strong>{project.responsible || 'Sin asignar'}</strong>
+                </div>
+              </Section>
+              <Section title="Mis tareas">
+                {tasks.length ? (
+                  <div className="rr-list">
+                    {tasks.map((task) => (
+                      <div className="rr-list-row" key={task.id}>
+                        <strong>{task.description}</strong>
+                        <Badge tone={task.done ? 'green' : 'amber'}>
+                          {task.done ? 'Completada' : 'Pendiente'}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <Empty>No tienes tareas asignadas en este proyecto.</Empty>
+                )}
+              </Section>
+              <Section title="Incidencias">
+                {incidents.length ? (
+                  <div className="rr-list">
+                    {incidents.map((incident) => (
+                      <div className="rr-list-row" key={incident.id}>
+                        <div>
+                          <strong>{incident.description}</strong>
+                          <p>{incident.date}</p>
+                        </div>
+                        <Badge tone={incident.resolved ? 'green' : 'amber'}>
+                          {incident.resolved ? 'Resuelta' : 'Abierta'}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <Empty>No hay incidencias registradas.</Empty>
+                )}
+              </Section>
+            </>
+          ) : (
+            <Section title="Proyecto no encontrado">
+              <Empty>El proyecto no está disponible.</Empty>
+            </Section>
+          )}
+        </div>
+      )}
     </div>
   )
 }
