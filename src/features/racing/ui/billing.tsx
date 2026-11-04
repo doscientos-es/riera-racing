@@ -1,3 +1,4 @@
+import { Button } from '@doscientos/ui'
 import { useState, type FormEvent } from 'react'
 
 import type { Workshop } from '../domain/model'
@@ -6,6 +7,7 @@ import {
   Badge,
   Empty,
   Field,
+  FormDialog,
   ProjectSelect,
   Section,
   downloadCsv,
@@ -16,6 +18,7 @@ import {
 } from './shared'
 
 export function BillingPage({ state, change }: { state: Workshop; change: Change }) {
+  const [adding, setAdding] = useState(false)
   const [projectId, setProjectId] = useState('')
   const available = state.projects.filter(
     (project) =>
@@ -28,8 +31,10 @@ export function BillingPage({ state, change }: { state: Workshop; change: Change
       change((current) =>
         createInvoice(current, { id: uid(), projectId, date: today(), lines: [], paid: false }),
       )
-    )
+    ) {
       setProjectId('')
+      setAdding(false)
+    }
   }
   const exportCsv = () =>
     downloadCsv('riera-racing-borradores-demo.csv', [
@@ -57,21 +62,22 @@ export function BillingPage({ state, change }: { state: Workshop; change: Change
           <h1>Facturación</h1>
           <p>Prepara borradores a partir de los presupuestos aprobados.</p>
         </div>
-        <button
-          className="rr-button rr-button-light"
-          disabled={!state.invoices.length}
-          onClick={exportCsv}
-        >
-          Descargar CSV de ejemplo
-        </button>
+        <div className="rr-actions">
+          <Button variant="outline" disabled={!state.invoices.length} onClick={exportCsv}>
+            Descargar CSV de ejemplo
+          </Button>
+          <Button onClick={() => setAdding(true)}>+ Preparar borrador</Button>
+        </div>
       </div>
       <div className="rr-notice">
         <strong>Solo demostración.</strong> Los borradores no son facturas fiscales, no se envían y
         el CSV debe adaptarse al formato de la asesoría.
       </div>
-      <Section
+      <FormDialog
+        open={adding}
+        onOpenChange={setAdding}
         title="Preparar borrador"
-        subtitle="Se copian las líneas del presupuesto aprobado para su revisión."
+        description="Se copian las líneas del presupuesto aprobado para su revisión."
       >
         <form className="rr-actions rr-invoice-form" onSubmit={create}>
           <Field label="Proyecto">
@@ -82,11 +88,11 @@ export function BillingPage({ state, change }: { state: Workshop; change: Change
               placeholder="Selecciona un proyecto aprobado"
             />
           </Field>
-          <button className="rr-button" disabled={!projectId}>
+          <Button type="submit" disabled={!projectId}>
             Crear borrador
-          </button>
+          </Button>
         </form>
-      </Section>
+      </FormDialog>
       <Section title="Borradores" subtitle="Importes de ejemplo con IVA del 21 %.">
         {state.invoices.length ? (
           <div className="rr-list">
@@ -111,8 +117,8 @@ export function BillingPage({ state, change }: { state: Workshop; change: Change
                         {invoice.paid ? 'Cobro simulado' : 'Borrador'}
                       </Badge>
                       {!invoice.paid && (
-                        <button
-                          className="rr-button rr-button-light"
+                        <Button
+                          variant="outline"
                           onClick={() =>
                             change((current) => ({
                               ...current,
@@ -123,7 +129,7 @@ export function BillingPage({ state, change }: { state: Workshop; change: Change
                           }
                         >
                           Simular cobro
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>

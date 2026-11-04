@@ -1,4 +1,5 @@
-import { Search, Wrench, type LucideIcon } from 'lucide-react'
+import { Button } from '@doscientos/ui'
+import { Search, type LucideIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 import type { AssistantPrincipal } from '../application/assistant-access'
@@ -36,7 +37,6 @@ export function Sidebar({
   const searchRef = useRef<HTMLInputElement>(null)
   const visible = filterNavigation(navigation, query)
   const groups = [...new Set(visible.map((item) => item.group))]
-  const completed = state.projects.filter((project) => project.status === 'terminado').length
   const counts: Partial<Record<Page, number>> = {
     incidencias: state.incidents.filter((incident) => !incident.resolved).length,
     presupuestos: state.projects.filter((project) => project.status === 'presupuesto').length,
@@ -110,26 +110,9 @@ export function Sidebar({
         {visible.length === 0 && <p className="rr-sidebar-empty">No hay módulos que coincidan.</p>}
       </nav>
       <div className="rr-sidebar-footer">
-        <div className="rr-sidebar-summary">
-          <strong>
-            <Wrench size={16} aria-hidden="true" /> Proyectos terminados
-          </strong>
-          <progress
-            max={state.projects.length || 1}
-            value={completed}
-            aria-label={`${completed} de ${state.projects.length} proyectos terminados`}
-          />
-          <span>
-            {completed} de {state.projects.length} proyectos · demo
-          </span>
-        </div>
-        <button
-          type="button"
-          className="rr-button rr-sidebar-primary"
-          onClick={() => navigate('presupuestos')}
-        >
+        <Button className="rr-sidebar-primary" onClick={() => navigate('presupuestos')}>
           Ver presupuestos
-        </button>
+        </Button>
         <button type="button" className="rr-sidebar-reset" onClick={reset}>
           Restablecer datos de ejemplo
         </button>

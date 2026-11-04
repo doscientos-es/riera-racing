@@ -1,10 +1,16 @@
 @import 'tailwindcss';
+@import '@doscientos/ui/styles.css';
 
 @theme {
   --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
 :root {
+  --primary: #b73b31;
+  --primary-foreground: #fff;
+  --ring: #d3654f;
+  --popover: #fff;
+  --popover-foreground: #14171c;
   font-family: var(--font-sans);
   color: #14171c;
   background: #f6f7f9;
@@ -211,33 +217,6 @@ a:focus-visible {
 .rr-sidebar-footer {
   display: grid;
   gap: 12px;
-}
-.rr-sidebar-summary {
-  display: grid;
-  gap: 8px;
-  padding: 12px;
-  border: 1px solid #e3e6eb;
-  border-radius: 8px;
-  background: #fff;
-}
-.rr-sidebar-summary strong {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 600;
-}
-.rr-sidebar-summary strong svg {
-  color: #b73b31;
-}
-.rr-sidebar-summary progress {
-  width: 100%;
-  height: 6px;
-  accent-color: #b73b31;
-}
-.rr-sidebar-summary span {
-  color: #596273;
-  font-size: 12px;
 }
 .rr-sidebar-primary {
   width: 100%;
@@ -646,6 +625,13 @@ td small {
   gap: 14px;
   align-items: end;
 }
+.rr-form-dialog .rr-form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.rr-form-error {
+  color: #a52620;
+  font-size: 13px;
+}
 .rr-field {
   display: grid;
   gap: 6px;
@@ -933,11 +919,6 @@ td small {
 .rr-voice-body .rr-form-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
-@media (max-height: 760px) {
-  .rr-sidebar-summary {
-    display: none;
-  }
-}
 @media (max-width: 1100px) {
   .rr-content {
     padding: 30px 24px;
@@ -1022,6 +1003,9 @@ td small {
     bottom: 16px;
   }
   .rr-voice-body .rr-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .rr-form-dialog .rr-form-grid {
     grid-template-columns: 1fr;
   }
   .rr-heading {

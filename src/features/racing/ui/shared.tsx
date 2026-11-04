@@ -1,8 +1,57 @@
-import type { ReactNode } from 'react'
+import {
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
+} from '@doscientos/ui'
+import { createContext, useContext, type ReactNode } from 'react'
 
 import type { Project, Workshop } from '../domain/model'
 
 export type Change = (command: (state: Workshop) => Workshop) => boolean
+export const FormErrorContext = createContext<{ error: string; clear: () => void }>({
+  error: '',
+  clear: () => {},
+})
+
+export function FormDialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  children,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  title: string
+  description?: string
+  children: ReactNode
+}) {
+  const { error, clear } = useContext(FormErrorContext)
+  return (
+    <DialogRoot
+      open={open}
+      onOpenChange={(next) => {
+        clear()
+        onOpenChange(next)
+      }}
+    >
+      <DialogContent className="rr-form-dialog">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          {description && <DialogDescription>{description}</DialogDescription>}
+        </DialogHeader>
+        {error && (
+          <p className="rr-form-error" role="alert">
+            {error}
+          </p>
+        )}
+        {children}
+      </DialogContent>
+    </DialogRoot>
+  )
+}
 export const uid = () => crypto.randomUUID()
 export const today = () => new Date().toISOString().slice(0, 10)
 export const money = (cents: number) =>

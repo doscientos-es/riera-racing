@@ -17,7 +17,7 @@ describe('navegación lateral', () => {
     expect(filterNavigation(navigation, ' ')).toEqual(navigation)
   })
 
-  it('muestra la página activa y el progreso calculado a partir de los proyectos', () => {
+  it('muestra la página activa sin el resumen de proyectos terminados', () => {
     const html = renderToStaticMarkup(
       <Sidebar
         state={seedWorkshop()}
@@ -29,7 +29,7 @@ describe('navegación lateral', () => {
       />,
     )
     expect(html).toContain('aria-current="page"')
-    expect(html).toContain('1 de 3 proyectos terminados')
+    expect(html).not.toContain('Proyectos terminados')
     expect(html).toContain('Buscar módulos')
     expect(html).toContain('Ver presupuestos')
     expect(html).toContain('demo')

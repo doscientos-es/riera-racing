@@ -28,7 +28,7 @@ import { OperationsPage, TeamPage } from './operations'
 import { ActivityPage, ClientsPage, FinanceOverviewPage } from './overview-pages'
 import { IncidentsPage, PlanningPage } from './planning'
 import { ProjectsPage } from './projects'
-import type { Change } from './shared'
+import { FormErrorContext, type Change } from './shared'
 import { Sidebar, type NavigationItem } from './sidebar'
 
 const navigation: NavigationItem[] = [
@@ -68,6 +68,7 @@ export function RacingApp() {
   const [page, setPage] = useState<Page>('inicio')
   const [selected, setSelected] = useState('')
   const [message, setMessage] = useState('')
+  const [formError, setFormError] = useState('')
   const [principal, setPrincipal] = useState<AssistantPrincipal>({ role: 'admin' })
   useEffect(() => {
     const onStorage = (event: StorageEvent) => {
@@ -108,10 +109,13 @@ export function RacingApp() {
       }
       saveWorkshop(window.localStorage, next)
       setLoaded({ state: next, error: null })
+      setFormError('')
       setMessage('Cambios guardados en este navegador.')
       return true
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'No se han podido guardar los cambios.')
+      const text = error instanceof Error ? error.message : 'No se han podido guardar los cambios.'
+      setFormError(text)
+      setMessage(text)
       return false
     }
   }
@@ -131,104 +135,108 @@ export function RacingApp() {
     )
   const state = loaded.state
   return (
-    <div className="rr-app">
-      <a className="rr-skip" href="#contenido">
-        Saltar al contenido
-      </a>
-      <Sidebar
-        state={state}
-        principal={principal}
-        navigation={navigation}
-        page={page}
-        navigate={setPage}
-        reset={reset}
-      />
-      <div className="rr-main">
-        <header className="rr-topbar">
-          <div>
-            <img className="rr-mobile-brand" src="/icon.png" alt="" />
-            <span>Riera Racing</span>
-            <span className="rr-top-divider">/</span>
-            <strong>{navigation.find((item) => item.id === page)?.label}</strong>
-          </div>
-          <span className="rr-top-demo">
-            DEMO LOCAL <span />
-          </span>
-        </header>
-        <main id="contenido" className="rr-content">
-          <div className="rr-mobile-nav" aria-label="Secciones">
-            {navigation.map(({ id, label }) => (
-              <button
-                key={id}
-                className={page === id ? 'active' : ''}
-                onClick={() => setPage(id)}
-                aria-current={page === id ? 'page' : undefined}
-              >
-                {label}
+    <FormErrorContext.Provider value={{ error: formError, clear: () => setFormError('') }}>
+      <div className="rr-app">
+        <a className="rr-skip" href="#contenido">
+          Saltar al contenido
+        </a>
+        <Sidebar
+          state={state}
+          principal={principal}
+          navigation={navigation}
+          page={page}
+          navigate={setPage}
+          reset={reset}
+        />
+        <div className="rr-main">
+          <header className="rr-topbar">
+            <div>
+              <img className="rr-mobile-brand" src="/icon.png" alt="" />
+              <span>Riera Racing</span>
+              <span className="rr-top-divider">/</span>
+              <strong>{navigation.find((item) => item.id === page)?.label}</strong>
+            </div>
+            <span className="rr-top-demo">
+              DEMO LOCAL <span />
+            </span>
+          </header>
+          <main id="contenido" className="rr-content">
+            <div className="rr-mobile-nav" aria-label="Secciones">
+              {navigation.map(({ id, label }) => (
+                <button
+                  key={id}
+                  className={page === id ? 'active' : ''}
+                  onClick={() => setPage(id)}
+                  aria-current={page === id ? 'page' : undefined}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            {message && (
+              <output className="rr-message">
+                <span>{message}</span>
+                <button aria-label="Cerrar aviso" onClick={() => setMessage('')}>
+                  ×
+                </button>
+              </output>
+            )}
+            {page === 'inicio' && (
+              <Dashboard state={state} navigate={setPage} select={setSelected} />
+            )}
+            {(page === 'proyectos' || page === 'presupuestos') && (
+              <ProjectsPage
+                key={page}
+                state={state}
+                change={change}
+                selected={selected}
+                select={setSelected}
+                budgetsOnly={page === 'presupuestos'}
+              />
+            )}
+            {page === 'planificacion' && <PlanningPage state={state} change={change} />}
+            {page === 'incidencias' && <IncidentsPage state={state} change={change} />}
+            {page === 'clientes' && (
+              <ClientsPage
+                state={state}
+                openProject={(id) => {
+                  setSelected(id)
+                  setPage('proyectos')
+                }}
+              />
+            )}
+            {page === 'taller' && <OperationsPage state={state} change={change} />}
+            {page === 'inventario' && <InventoryPage state={state} change={change} />}
+            {page === 'compras' && <PurchasesPage state={state} change={change} />}
+            {page === 'facturacion' && <BillingPage state={state} change={change} />}
+            {(page === 'gastos' || page === 'contabilidad' || page === 'informes') && (
+              <FinanceOverviewPage state={state} mode={page} />
+            )}
+            {page === 'actividad' && <ActivityPage state={state} />}
+            {page === 'equipo' && <TeamPage state={state} change={change} />}
+            {page === 'asistente' && (
+              <AssistantPage
+                key={principal.role}
+                state={state}
+                change={assistantChange}
+                principal={principal}
+              />
+            )}
+            <footer className="rr-footer">
+              Prototipo de demostración · Datos ficticios · Dictado según el navegador
+              <button className="rr-reset-mobile" onClick={reset}>
+                Restablecer datos de ejemplo
               </button>
-            ))}
-          </div>
-          {message && (
-            <output className="rr-message">
-              <span>{message}</span>
-              <button aria-label="Cerrar aviso" onClick={() => setMessage('')}>
-                ×
-              </button>
-            </output>
-          )}
-          {page === 'inicio' && <Dashboard state={state} navigate={setPage} select={setSelected} />}
-          {(page === 'proyectos' || page === 'presupuestos') && (
-            <ProjectsPage
-              key={page}
-              state={state}
-              change={change}
-              selected={selected}
-              select={setSelected}
-              budgetsOnly={page === 'presupuestos'}
-            />
-          )}
-          {page === 'planificacion' && <PlanningPage state={state} change={change} />}
-          {page === 'incidencias' && <IncidentsPage state={state} change={change} />}
-          {page === 'clientes' && (
-            <ClientsPage
-              state={state}
-              openProject={(id) => {
-                setSelected(id)
-                setPage('proyectos')
-              }}
-            />
-          )}
-          {page === 'taller' && <OperationsPage state={state} change={change} />}
-          {page === 'inventario' && <InventoryPage state={state} change={change} />}
-          {page === 'compras' && <PurchasesPage state={state} change={change} />}
-          {page === 'facturacion' && <BillingPage state={state} change={change} />}
-          {(page === 'gastos' || page === 'contabilidad' || page === 'informes') && (
-            <FinanceOverviewPage state={state} mode={page} />
-          )}
-          {page === 'actividad' && <ActivityPage state={state} />}
-          {page === 'equipo' && <TeamPage state={state} change={change} />}
-          {page === 'asistente' && (
-            <AssistantPage
-              key={principal.role}
-              state={state}
-              change={assistantChange}
-              principal={principal}
-            />
-          )}
-          <footer className="rr-footer">
-            Prototipo de demostración · Datos ficticios · Dictado según el navegador
-            <button className="rr-reset-mobile" onClick={reset}>
-              Restablecer datos de ejemplo
-            </button>
-          </footer>
-        </main>
+            </footer>
+          </main>
+        </div>
+        <FloatingAssistant
+          state={state}
+          change={assistantChange}
+          principal={principal}
+          setPrincipal={setPrincipal}
+        />
       </div>
-      <FloatingAssistant
-        state={state}
-        change={assistantChange}
-        principal={principal}
-        setPrincipal={setPrincipal}
-      />
-    </div>
+    </FormErrorContext.Provider>
   )
 }

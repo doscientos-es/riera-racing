@@ -1,3 +1,4 @@
+import { Button } from '@doscientos/ui'
 import { useState, type FormEvent } from 'react'
 
 import type { Purchase, Workshop } from '../domain/model'
@@ -6,6 +7,7 @@ import {
   Badge,
   Empty,
   Field,
+  FormDialog,
   ProjectSelect,
   Section,
   eurosToCents,
@@ -44,38 +46,34 @@ export function InventoryPage({ state, change }: { state: Workshop; change: Chan
           <h1>Inventario</h1>
           <p>Existencias, ubicación y coste de las piezas del taller.</p>
         </div>
-        <button className="rr-button" onClick={() => setAdding(!adding)}>
-          {adding ? 'Cancelar' : '+ Nueva pieza'}
-        </button>
+        <Button onClick={() => setAdding(true)}>+ Nueva pieza</Button>
       </div>
-      {adding && (
-        <Section title="Nueva pieza">
-          <form className="rr-form-grid" onSubmit={save}>
-            <Field label="Referencia">
-              <input name="sku" required />
-            </Field>
-            <Field label="Pieza">
-              <input name="name" required />
-            </Field>
-            <Field label="Proveedor">
-              <input name="supplier" required />
-            </Field>
-            <Field label="Ubicación">
-              <input name="location" required />
-            </Field>
-            <Field label="Stock inicial">
-              <input name="stock" type="number" min="0" step="1" defaultValue="0" required />
-            </Field>
-            <Field label="Stock mínimo">
-              <input name="minimum" type="number" min="0" step="1" defaultValue="1" required />
-            </Field>
-            <Field label="Coste unitario (€)">
-              <input name="cost" type="number" min="0" step="0.01" required />
-            </Field>
-            <button className="rr-button">Guardar pieza</button>
-          </form>
-        </Section>
-      )}
+      <FormDialog open={adding} onOpenChange={setAdding} title="Nueva pieza">
+        <form className="rr-form-grid" onSubmit={save}>
+          <Field label="Referencia">
+            <input name="sku" required />
+          </Field>
+          <Field label="Pieza">
+            <input name="name" required />
+          </Field>
+          <Field label="Proveedor">
+            <input name="supplier" required />
+          </Field>
+          <Field label="Ubicación">
+            <input name="location" required />
+          </Field>
+          <Field label="Stock inicial">
+            <input name="stock" type="number" min="0" step="1" defaultValue="0" required />
+          </Field>
+          <Field label="Stock mínimo">
+            <input name="minimum" type="number" min="0" step="1" defaultValue="1" required />
+          </Field>
+          <Field label="Coste unitario (€)">
+            <input name="cost" type="number" min="0" step="0.01" required />
+          </Field>
+          <Button type="submit">Guardar pieza</Button>
+        </form>
+      </FormDialog>
       <Section
         title="Almacén"
         subtitle="El consumo desde un parte descuenta stock; la recepción confirmada lo incrementa."
@@ -150,41 +148,39 @@ export function PurchasesPage({ state, change }: { state: Workshop; change: Chan
           <h1>Compras</h1>
           <p>Pedidos vinculados a proyectos y comprobación de albaranes.</p>
         </div>
-        <button className="rr-button" onClick={() => setAdding(!adding)}>
-          {adding ? 'Cancelar' : '+ Nuevo pedido'}
-        </button>
+        <Button onClick={() => setAdding(true)}>+ Nuevo pedido</Button>
       </div>
-      {adding && (
-        <Section
-          title="Nuevo pedido"
-          subtitle="Registro interno de ejemplo; no se envía al proveedor."
-        >
-          <form className="rr-form-grid" onSubmit={save}>
-            <Field label="Pieza">
-              <select name="product" required defaultValue="">
-                <option value="">Selecciona una pieza</option>
-                {state.products.map((product) => (
-                  <option key={product.id} value={product.id}>
-                    {product.name} · {product.supplier}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Cantidad">
-              <input name="quantity" type="number" min="1" step="1" defaultValue="1" required />
-            </Field>
-            <Field label="Proyecto (opcional)">
-              <ProjectSelect
-                projects={state.projects}
-                value={projectId}
-                onChange={setProjectId}
-                placeholder="Compra general"
-              />
-            </Field>
-            <button className="rr-button">Crear pedido</button>
-          </form>
-        </Section>
-      )}
+      <FormDialog
+        open={adding}
+        onOpenChange={setAdding}
+        title="Nuevo pedido"
+        description="Registro interno de ejemplo; no se envía al proveedor."
+      >
+        <form className="rr-form-grid" onSubmit={save}>
+          <Field label="Pieza">
+            <select name="product" required defaultValue="">
+              <option value="">Selecciona una pieza</option>
+              {state.products.map((product) => (
+                <option key={product.id} value={product.id}>
+                  {product.name} · {product.supplier}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Cantidad">
+            <input name="quantity" type="number" min="1" step="1" defaultValue="1" required />
+          </Field>
+          <Field label="Proyecto (opcional)">
+            <ProjectSelect
+              projects={state.projects}
+              value={projectId}
+              onChange={setProjectId}
+              placeholder="Compra general"
+            />
+          </Field>
+          <Button type="submit">Crear pedido</Button>
+        </form>
+      </FormDialog>
       <Section
         title="Pedidos y recepciones"
         subtitle="Una pieza por pedido en esta demo. Confirma diferencias antes de modificar el stock."
@@ -242,13 +238,17 @@ function PurchaseRow({
             {purchase.status}
           </Badge>
           {purchase.status === 'pendiente' && (
-            <button className="rr-button rr-button-light" onClick={() => setReceiving(!receiving)}>
-              {receiving ? 'Cerrar' : 'Revisar recepción'}
-            </button>
+            <Button variant="outline" onClick={() => setReceiving(true)}>
+              Revisar recepción
+            </Button>
           )}
         </div>
       </div>
-      {receiving && (
+      <FormDialog
+        open={receiving}
+        onOpenChange={setReceiving}
+        title={`Revisar recepción · ${purchase.reference}`}
+      >
         <form
           className="rr-receipt"
           onSubmit={(event) => {
@@ -285,15 +285,13 @@ function PurchaseRow({
               cerrar la recepción con {quantity || '0'} unidades.
             </label>
           )}
-          <button className="rr-button" type="submit">
-            Confirmar recepción
-          </button>
+          <Button type="submit">Confirmar recepción</Button>
           <small>
             Se sumará solo la cantidad recibida. Esta demo cierra el pedido; no gestiona entregas
             pendientes.
           </small>
         </form>
-      )}
+      </FormDialog>
     </div>
   )
 }

@@ -1,3 +1,4 @@
+import { Button } from '@doscientos/ui'
 import { useState, type FormEvent } from 'react'
 
 import type { LineKind, Project, Workshop } from '../domain/model'
@@ -16,6 +17,7 @@ import {
   Badge,
   Empty,
   Field,
+  FormDialog,
   Section,
   Status,
   eurosToCents,
@@ -73,37 +75,33 @@ export function ProjectsPage({
           <h1>{budgetsOnly ? 'Presupuestos' : 'Proyectos de taller'}</h1>
           <p>Cada vehículo, su presupuesto y el trabajo realizado en un solo lugar.</p>
         </div>
-        <button className="rr-button" onClick={() => setCreating(!creating)}>
-          {creating ? 'Cerrar' : '+ Nuevo proyecto'}
-        </button>
+        <Button onClick={() => setCreating(true)}>+ Nuevo proyecto</Button>
       </div>
-      {creating && (
-        <Section
-          title="Nuevo proyecto"
-          subtitle="Datos de ejemplo: no introduzcas información real."
-        >
-          <form className="rr-form-grid" onSubmit={create}>
-            <Field label="Cliente">
-              <input name="client" required placeholder="Nombre del cliente" />
-            </Field>
-            <Field label="Vehículo">
-              <input name="vehicle" required placeholder="Marca y modelo" />
-            </Field>
-            <Field label="Matrícula o referencia">
-              <input name="plate" required placeholder="Matrícula o referencia interna" />
-            </Field>
-            <Field label="Trabajo">
-              <input name="title" required placeholder="Preparación, revisión…" />
-            </Field>
-            <Field label="Responsable (opcional)">
-              <input name="responsible" placeholder="Operario responsable" />
-            </Field>
-            <button className="rr-button" type="submit">
-              Crear proyecto
-            </button>
-          </form>
-        </Section>
-      )}
+      <FormDialog
+        open={creating}
+        onOpenChange={setCreating}
+        title="Nuevo proyecto"
+        description="Datos de ejemplo: no introduzcas información real."
+      >
+        <form className="rr-form-grid" onSubmit={create}>
+          <Field label="Cliente">
+            <input name="client" required placeholder="Nombre del cliente" />
+          </Field>
+          <Field label="Vehículo">
+            <input name="vehicle" required placeholder="Marca y modelo" />
+          </Field>
+          <Field label="Matrícula o referencia">
+            <input name="plate" required placeholder="Matrícula o referencia interna" />
+          </Field>
+          <Field label="Trabajo">
+            <input name="title" required placeholder="Preparación, revisión…" />
+          </Field>
+          <Field label="Responsable (opcional)">
+            <input name="responsible" placeholder="Operario responsable" />
+          </Field>
+          <Button type="submit">Crear proyecto</Button>
+        </form>
+      </FormDialog>
       <div className="rr-project-layout">
         <Section
           title={budgetsOnly ? 'Presupuestos' : 'Proyectos'}
@@ -210,16 +208,16 @@ function ProjectDetail({
             <p>Piezas y mano de obra · importes sin IVA</p>
           </div>
           {project.status === 'presupuesto' && (
-            <button
-              className="rr-button rr-button-light"
+            <Button
+              variant="outline"
               onClick={() => {
-                setAdding(!adding)
+                setAdding(true)
                 setEditing(null)
                 setKind('pieza')
               }}
             >
-              {adding ? 'Cancelar' : '+ Añadir partida'}
-            </button>
+              + Añadir partida
+            </Button>
           )}
         </div>
         {project.lines.length ? (
@@ -248,8 +246,9 @@ function ProjectDetail({
                     <td>{money(line.price * line.quantity)}</td>
                     {project.status === 'presupuesto' && (
                       <td>
-                        <button
-                          className="rr-text-button"
+                        <Button
+                          variant="link"
+                          size="sm"
                           onClick={() => {
                             setEditing(line.id)
                             setKind(line.kind)
@@ -257,16 +256,17 @@ function ProjectDetail({
                           }}
                         >
                           Editar
-                        </button>{' '}
-                        <button
-                          className="rr-text-button"
+                        </Button>{' '}
+                        <Button
+                          variant="link"
+                          size="sm"
                           onClick={() => {
                             if (window.confirm('¿Eliminar esta partida?'))
                               change((current) => removeQuoteLine(current, project.id, line.id))
                           }}
                         >
                           Eliminar
-                        </button>
+                        </Button>
                       </td>
                     )}
                   </tr>
@@ -277,8 +277,12 @@ function ProjectDetail({
         ) : (
           <Empty>Añade piezas o mano de obra al presupuesto.</Empty>
         )}
-        {adding && (
-          <form key={editing ?? 'new'} className="rr-form-grid rr-inline-form" onSubmit={addLine}>
+        <FormDialog
+          open={adding}
+          onOpenChange={setAdding}
+          title={editing ? 'Editar partida' : 'Añadir partida'}
+        >
+          <form key={editing ?? 'new'} className="rr-form-grid" onSubmit={addLine}>
             <Field label="Tipo">
               <select value={kind} onChange={(event) => setKind(event.target.value as LineKind)}>
                 <option value="pieza">Pieza</option>
@@ -315,27 +319,22 @@ function ProjectDetail({
                 required
               />
             </Field>
-            <button className="rr-button" type="submit">
-              Guardar partida
-            </button>
+            <Button type="submit">Guardar partida</Button>
           </form>
-        )}
+        </FormDialog>
         <div className="rr-actions">
           {project.status === 'presupuesto' && (
-            <button
-              className="rr-button"
-              onClick={() => change((current) => approveProject(current, project.id))}
-            >
+            <Button onClick={() => change((current) => approveProject(current, project.id))}>
               Aprobar y pasar a taller
-            </button>
+            </Button>
           )}
           {project.status === 'en taller' && (
-            <button
-              className="rr-button rr-button-light"
+            <Button
+              variant="outline"
               onClick={() => change((current) => finishProject(current, project.id))}
             >
               Marcar trabajo terminado
-            </button>
+            </Button>
           )}
           <span className="rr-hint">
             Aprobación registrada en esta demo; no se envía al cliente.
@@ -383,6 +382,7 @@ function ProjectTasks({
   state: Workshop
   change: Change
 }) {
+  const [adding, setAdding] = useState(false)
   const tasks = state.tasks.filter((task) => task.projectId === project.id)
   const save = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -394,11 +394,21 @@ function ProjectTasks({
       change((current) =>
         addTask(current, { id: uid(), projectId: project.id, description, worker, done: false }),
       )
-    )
+    ) {
       form.reset()
+      setAdding(false)
+    }
   }
   return (
-    <Section title="Tareas del proyecto" subtitle="Asignaciones de ejemplo para el equipo.">
+    <Section
+      title="Tareas del proyecto"
+      subtitle="Asignaciones de ejemplo para el equipo."
+      action={
+        <Button variant="outline" onClick={() => setAdding(true)}>
+          + Añadir tarea
+        </Button>
+      }
+    >
       {tasks.length ? (
         <div className="rr-list">
           {tasks.map((task) => (
@@ -428,15 +438,17 @@ function ProjectTasks({
       ) : (
         <Empty>No hay tareas asignadas.</Empty>
       )}
-      <form className="rr-form-grid rr-inline-form" onSubmit={save}>
-        <Field label="Tarea">
-          <input name="task" required />
-        </Field>
-        <Field label="Responsable">
-          <input name="worker" required defaultValue={project.responsible ?? ''} />
-        </Field>
-        <button className="rr-button">Añadir tarea</button>
-      </form>
+      <FormDialog open={adding} onOpenChange={setAdding} title="Añadir tarea">
+        <form className="rr-form-grid" onSubmit={save}>
+          <Field label="Tarea">
+            <input name="task" required />
+          </Field>
+          <Field label="Responsable">
+            <input name="worker" required defaultValue={project.responsible ?? ''} />
+          </Field>
+          <Button type="submit">Añadir tarea</Button>
+        </form>
+      </FormDialog>
     </Section>
   )
 }

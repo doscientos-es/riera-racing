@@ -1,3 +1,5 @@
+import { Button } from '@doscientos/ui'
+
 import type { Workshop } from '../domain/model'
 import { projectCosts, quoteTotal } from '../domain/workshop'
 import { Badge, Section, Status, money } from './shared'
@@ -40,9 +42,7 @@ export function Dashboard({
           <h1>Hola, equipo</h1>
           <p>Así va el taller. Datos de demostración.</p>
         </div>
-        <button className="rr-button" onClick={() => navigate('presupuestos')}>
-          Ver presupuestos
-        </button>
+        <Button onClick={() => navigate('presupuestos')}>Ver presupuestos</Button>
       </div>
       <div className="rr-metrics rr-dashboard-metrics">
         <div>
@@ -71,9 +71,9 @@ export function Dashboard({
           title="En marcha"
           subtitle="Trabajos activos en el taller"
           action={
-            <button className="rr-text-button" onClick={() => navigate('proyectos')}>
+            <Button variant="outline" size="sm" onClick={() => navigate('proyectos')}>
               Ver todos →
-            </button>
+            </Button>
           }
         >
           <div className="rr-list">

@@ -1,3 +1,4 @@
+import { Button } from '@doscientos/ui'
 import { useState, type FormEvent } from 'react'
 
 import type { Workshop } from '../domain/model'
@@ -6,6 +7,7 @@ import {
   Badge,
   Empty,
   Field,
+  FormDialog,
   ProjectSelect,
   Section,
   eurosToCents,
@@ -53,63 +55,54 @@ export function OperationsPage({ state, change }: { state: Workshop; change: Cha
           <h1>Partes de taller</h1>
           <p>Registra intervenciones, horas, piezas y gastos por vehículo.</p>
         </div>
-        <button className="rr-button" onClick={() => setAdding(!adding)}>
-          {adding ? 'Cancelar' : '+ Registrar parte'}
-        </button>
+        <Button onClick={() => setAdding(true)}>+ Registrar parte</Button>
       </div>
-      {adding && (
-        <Section
-          title="Nuevo parte"
-          subtitle="Las horas se imputan al proyecto; esto no es un sistema de fichaje laboral."
-        >
-          <form className="rr-form-grid" onSubmit={save}>
-            <Field label="Proyecto">
-              <ProjectSelect projects={projects} value={projectId} onChange={setProjectId} />
+      <FormDialog
+        open={adding}
+        onOpenChange={setAdding}
+        title="Nuevo parte"
+        description="Las horas se imputan al proyecto; esto no es un sistema de fichaje laboral."
+      >
+        <form className="rr-form-grid" onSubmit={save}>
+          <Field label="Proyecto">
+            <ProjectSelect projects={projects} value={projectId} onChange={setProjectId} />
+          </Field>
+          <Field label="Fecha">
+            <input name="date" type="date" defaultValue={today()} required />
+          </Field>
+          <Field label="Operario">
+            <input name="worker" placeholder="Nombre del operario" required />
+          </Field>
+          <Field label="Intervención">
+            <input name="description" placeholder="Trabajo realizado" required />
+          </Field>
+          <Field label="Horas">
+            <input name="hours" type="number" min="0.01" step="0.25" defaultValue="1" required />
+          </Field>
+          <Field label="Coste / hora (€)">
+            <input name="hourlyCost" type="number" min="0" step="0.01" defaultValue="24" required />
+          </Field>
+          <Field label="Pieza consumida (opcional)">
+            <select value={productId} onChange={(event) => setProductId(event.target.value)}>
+              <option value="">Sin pieza</option>
+              {state.products.map((product) => (
+                <option key={product.id} value={product.id}>
+                  {product.name} · {product.stock} disponibles
+                </option>
+              ))}
+            </select>
+          </Field>
+          {productId && (
+            <Field label="Cantidad consumida">
+              <input name="quantity" type="number" min="1" step="1" defaultValue="1" required />
             </Field>
-            <Field label="Fecha">
-              <input name="date" type="date" defaultValue={today()} required />
-            </Field>
-            <Field label="Operario">
-              <input name="worker" placeholder="Nombre del operario" required />
-            </Field>
-            <Field label="Intervención">
-              <input name="description" placeholder="Trabajo realizado" required />
-            </Field>
-            <Field label="Horas">
-              <input name="hours" type="number" min="0.01" step="0.25" defaultValue="1" required />
-            </Field>
-            <Field label="Coste / hora (€)">
-              <input
-                name="hourlyCost"
-                type="number"
-                min="0"
-                step="0.01"
-                defaultValue="24"
-                required
-              />
-            </Field>
-            <Field label="Pieza consumida (opcional)">
-              <select value={productId} onChange={(event) => setProductId(event.target.value)}>
-                <option value="">Sin pieza</option>
-                {state.products.map((product) => (
-                  <option key={product.id} value={product.id}>
-                    {product.name} · {product.stock} disponibles
-                  </option>
-                ))}
-              </select>
-            </Field>
-            {productId && (
-              <Field label="Cantidad consumida">
-                <input name="quantity" type="number" min="1" step="1" defaultValue="1" required />
-              </Field>
-            )}
-            <Field label="Otros gastos (€)">
-              <input name="expense" type="number" min="0" step="0.01" defaultValue="0" required />
-            </Field>
-            <button className="rr-button">Guardar parte</button>
-          </form>
-        </Section>
-      )}
+          )}
+          <Field label="Otros gastos (€)">
+            <input name="expense" type="number" min="0" step="0.01" defaultValue="0" required />
+          </Field>
+          <Button type="submit">Guardar parte</Button>
+        </form>
+      </FormDialog>
       <Section
         title="Últimas intervenciones"
         subtitle="El coste incluye las horas, las piezas consumidas y otros gastos registrados."
@@ -166,26 +159,22 @@ export function TeamPage({ state, change }: { state: Workshop; change: Change })
           <h1>Equipo y vacaciones</h1>
           <p>Un registro sencillo de ausencias para coordinar el taller.</p>
         </div>
-        <button className="rr-button" onClick={() => setAdding(!adding)}>
-          {adding ? 'Cancelar' : '+ Añadir vacaciones'}
-        </button>
+        <Button onClick={() => setAdding(true)}>+ Añadir vacaciones</Button>
       </div>
-      {adding && (
-        <Section title="Registrar vacaciones">
-          <form className="rr-form-grid" onSubmit={save}>
-            <Field label="Operario">
-              <input name="worker" required />
-            </Field>
-            <Field label="Desde">
-              <input name="from" type="date" required />
-            </Field>
-            <Field label="Hasta">
-              <input name="to" type="date" required />
-            </Field>
-            <button className="rr-button">Guardar vacaciones</button>
-          </form>
-        </Section>
-      )}
+      <FormDialog open={adding} onOpenChange={setAdding} title="Registrar vacaciones">
+        <form className="rr-form-grid" onSubmit={save}>
+          <Field label="Operario">
+            <input name="worker" required />
+          </Field>
+          <Field label="Desde">
+            <input name="from" type="date" required />
+          </Field>
+          <Field label="Hasta">
+            <input name="to" type="date" required />
+          </Field>
+          <Button type="submit">Guardar vacaciones</Button>
+        </form>
+      </FormDialog>
       <Section
         title="Vacaciones registradas"
         subtitle="Ejemplo local, sin gestión laboral ni aprobación de solicitudes."

@@ -1,3 +1,4 @@
+import { Button } from '@doscientos/ui'
 import { useState, type FormEvent } from 'react'
 
 import type { Workshop } from '../domain/model'
@@ -6,6 +7,7 @@ import {
   Badge,
   Empty,
   Field,
+  FormDialog,
   ProjectSelect,
   Section,
   formText,
@@ -15,6 +17,7 @@ import {
 } from './shared'
 
 export function PlanningPage({ state, change }: { state: Workshop; change: Change }) {
+  const [adding, setAdding] = useState(false)
   const [projectId, setProjectId] = useState('')
   const save = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -33,6 +36,7 @@ export function PlanningPage({ state, change }: { state: Workshop; change: Chang
     ) {
       form.reset()
       setProjectId('')
+      setAdding(false)
     }
   }
   return (
@@ -42,10 +46,13 @@ export function PlanningPage({ state, change }: { state: Workshop; change: Chang
           <h1>Planificación</h1>
           <p>Tareas asignadas por vehículo y responsable.</p>
         </div>
+        <Button onClick={() => setAdding(true)}>+ Asignar tarea</Button>
       </div>
-      <Section
+      <FormDialog
+        open={adding}
+        onOpenChange={setAdding}
         title="Asignar tarea"
-        subtitle="Las tareas también aparecen en el detalle del proyecto."
+        description="Las tareas también aparecen en el detalle del proyecto."
       >
         <form className="rr-form-grid" onSubmit={save}>
           <Field label="Proyecto">
@@ -57,9 +64,9 @@ export function PlanningPage({ state, change }: { state: Workshop; change: Chang
           <Field label="Responsable">
             <input name="worker" required />
           </Field>
-          <button className="rr-button">Añadir tarea</button>
+          <Button type="submit">Añadir tarea</Button>
         </form>
-      </Section>
+      </FormDialog>
       <Section
         title="Tareas del taller"
         subtitle="Marca los trabajos realizados; esta vista no programa fechas ni turnos."
@@ -124,6 +131,7 @@ export function PlanningPage({ state, change }: { state: Workshop; change: Chang
 }
 
 export function IncidentsPage({ state, change }: { state: Workshop; change: Change }) {
+  const [adding, setAdding] = useState(false)
   const [projectId, setProjectId] = useState('')
   const save = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -142,6 +150,7 @@ export function IncidentsPage({ state, change }: { state: Workshop; change: Chan
     ) {
       form.reset()
       setProjectId('')
+      setAdding(false)
     }
   }
   return (
@@ -151,8 +160,9 @@ export function IncidentsPage({ state, change }: { state: Workshop; change: Chan
           <h1>Incidencias</h1>
           <p>Seguimiento de imprevistos por vehículo.</p>
         </div>
+        <Button onClick={() => setAdding(true)}>+ Registrar incidencia</Button>
       </div>
-      <Section title="Registrar incidencia">
+      <FormDialog open={adding} onOpenChange={setAdding} title="Registrar incidencia">
         <form className="rr-form-grid" onSubmit={save}>
           <Field label="Proyecto">
             <ProjectSelect projects={state.projects} value={projectId} onChange={setProjectId} />
@@ -163,9 +173,9 @@ export function IncidentsPage({ state, change }: { state: Workshop; change: Chan
           <Field label="Descripción">
             <input name="description" required />
           </Field>
-          <button className="rr-button">Guardar incidencia</button>
+          <Button type="submit">Guardar incidencia</Button>
         </form>
-      </Section>
+      </FormDialog>
       <Section title="Incidencias registradas">
         {state.incidents.length ? (
           <div className="rr-list">
@@ -179,8 +189,8 @@ export function IncidentsPage({ state, change }: { state: Workshop; change: Chan
                       {project?.reference} · {project?.vehicle} · {incident.date}
                     </p>
                   </div>
-                  <button
-                    className="rr-button rr-button-light"
+                  <Button
+                    variant="outline"
                     onClick={() =>
                       change((current) => ({
                         ...current,
@@ -191,7 +201,7 @@ export function IncidentsPage({ state, change }: { state: Workshop; change: Chan
                     }
                   >
                     {incident.resolved ? 'Reabrir' : 'Resolver'}
-                  </button>
+                  </Button>
                   <Badge tone={incident.resolved ? 'green' : 'amber'}>
                     {incident.resolved ? 'Resuelta' : 'Abierta'}
                   </Badge>
