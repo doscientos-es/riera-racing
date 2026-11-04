@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { seedWorkshop } from '../api'
 import { AssistantPage } from './assistant'
+import { AssistantForm } from './assistant-form'
 import { BillingPage } from './billing'
 import { PurchasesPage } from './inventory'
 import { ProjectsPage } from './projects'
@@ -36,5 +37,20 @@ describe('pantallas de la demo de taller', () => {
     expect(html).toContain('puede enviar audio')
     expect(html).toContain('Preparar propuesta')
     expect(html).toContain('el archivo no se lee ni se sube')
+  })
+
+  it('muestra la diferencia de recepción antes de confirmar el cambio de stock', () => {
+    const html = renderToStaticMarkup(
+      <AssistantForm
+        proposal={{ kind: 'receive', values: { purchaseId: 'o1', quantity: '1' } }}
+        setProposal={vi.fn()}
+        state={state}
+        change={change}
+        cancel={vi.fn()}
+      />,
+    )
+    expect(html).toContain('Pedido de 2 unidades; se cerrará con 1')
+    expect(html).toContain('Confirmo la diferencia')
+    expect(html).toContain('Confirmar y guardar')
   })
 })

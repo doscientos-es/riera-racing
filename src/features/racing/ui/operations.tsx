@@ -156,10 +156,7 @@ export function TeamPage({ state, change }: { state: Workshop; change: Change })
     const worker = formText(data, 'worker').trim()
     const from = formText(data, 'from')
     const to = formText(data, 'to')
-    if (
-      change((current) => addAbsence(current, { id: uid(), worker, from, to }))
-    )
-      setAdding(false)
+    if (change((current) => addAbsence(current, { id: uid(), worker, from, to }))) setAdding(false)
   }
   return (
     <div className="rr-stack">

@@ -12,7 +12,10 @@ type Recognition = {
   stop: () => void
   abort: () => void
 }
-type SpeechWindow = Window & { SpeechRecognition?: new () => Recognition; webkitSpeechRecognition?: new () => Recognition }
+type SpeechWindow = Window & {
+  SpeechRecognition?: new () => Recognition
+  webkitSpeechRecognition?: new () => Recognition
+}
 
 export function SpeechInput({ onText }: { onText: (text: string) => void }) {
   const recognition = useRef<Recognition | null>(null)
@@ -25,7 +28,9 @@ export function SpeechInput({ onText }: { onText: (text: string) => void }) {
     return Boolean(speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition)
   })
 
-  useEffect(() => { onTextRef.current = onText }, [onText])
+  useEffect(() => {
+    onTextRef.current = onText
+  }, [onText])
 
   useEffect(() => {
     const speechWindow = window as SpeechWindow
@@ -42,7 +47,10 @@ export function SpeechInput({ onText }: { onText: (text: string) => void }) {
       }
       if (texts.length) onTextRef.current(texts.join(' '))
     }
-    instance.onerror = () => setError('No se pudo reconocer el audio. Comprueba el permiso del micrófono o escribe la nota.')
+    instance.onerror = () =>
+      setError(
+        'No se pudo reconocer el audio. Comprueba el permiso del micrófono o escribe la nota.',
+      )
     instance.onend = () => setListening(false)
     recognition.current = instance
     return () => {
@@ -56,7 +64,10 @@ export function SpeechInput({ onText }: { onText: (text: string) => void }) {
 
   const toggle = () => {
     if (!recognition.current) return
-    if (listening) { recognition.current.stop(); return }
+    if (listening) {
+      recognition.current.stop()
+      return
+    }
     try {
       setError('')
       recognition.current.start()
@@ -68,12 +79,27 @@ export function SpeechInput({ onText }: { onText: (text: string) => void }) {
   return (
     <div className="rr-stack">
       <div className="rr-actions">
-        <button type="button" className="rr-button rr-button-light" disabled={!supported} onClick={toggle}>
+        <button
+          type="button"
+          className="rr-button rr-button-light"
+          disabled={!supported}
+          onClick={toggle}
+        >
           {listening ? 'Detener dictado' : 'Dictar con el micrófono'}
         </button>
-        <output className="rr-hint">{listening ? 'Escuchando…' : supported ? 'Permiso de micrófono necesario.' : 'Dictado no disponible en este navegador; escribe la nota.'}</output>
+        <output className="rr-hint">
+          {listening
+            ? 'Escuchando…'
+            : supported
+              ? 'Permiso de micrófono necesario.'
+              : 'Dictado no disponible en este navegador; escribe la nota.'}
+        </output>
       </div>
-      {error && <p className="rr-warning" role="alert">{error}</p>}
+      {error && (
+        <p className="rr-warning" role="alert">
+          {error}
+        </p>
+      )}
     </div>
   )
 }

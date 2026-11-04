@@ -1,4 +1,14 @@
-import type { Absence, Invoice, Part, Product, Project, Purchase, QuoteLine, Task, Workshop } from './model'
+import type {
+  Absence,
+  Invoice,
+  Part,
+  Product,
+  Project,
+  Purchase,
+  QuoteLine,
+  Task,
+  Workshop,
+} from './model'
 
 const positive = (value: number) => Number.isFinite(value) && value > 0
 const nonnegative = (value: number) => Number.isFinite(value) && value >= 0

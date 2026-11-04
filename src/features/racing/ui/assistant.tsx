@@ -1,6 +1,11 @@
 import { useState } from 'react'
 
-import { ACTIONS, suggestAction, type ActionKind, type Proposal } from '../application/assistant-intent'
+import {
+  ACTIONS,
+  suggestAction,
+  type ActionKind,
+  type Proposal,
+} from '../application/assistant-intent'
 import type { Workshop } from '../domain/model'
 import { AssistantForm } from './assistant-form'
 import { Badge, Field, Section, today, type Change } from './shared'
@@ -19,11 +24,19 @@ export function AssistantPage({ state, change }: { state: Workshop; change: Chan
   const [proposal, setProposal] = useState<Proposal | null>(null)
   const [error, setError] = useState('')
   const [fileName, setFileName] = useState('')
-  const changeText = (value: string) => { setText(value); setProposal(null); setError('') }
+  const changeText = (value: string) => {
+    setText(value)
+    setProposal(null)
+    setError('')
+  }
   const suggest = () => {
     const result = suggestAction(text, state, today())
     setProposal(result)
-    setError(result ? '' : 'No he identificado una única acción. Prueba un ejemplo o selecciona la acción manualmente.')
+    setError(
+      result
+        ? ''
+        : 'No he identificado una única acción. Prueba un ejemplo o selecciona la acción manualmente.',
+    )
   }
   return (
     <div className="rr-stack">
@@ -37,38 +50,81 @@ export function AssistantPage({ state, change }: { state: Workshop; change: Chan
       </div>
       <div className="rr-notice">
         <strong>Simulación sin IA.</strong> Reconoce frases sencillas, no entiende lenguaje libre.
-        El dictado depende del navegador y puede enviar audio a su proveedor de reconocimiento.
-        Usa solo datos ficticios. Los cambios confirmados se guardan en este navegador.
+        El dictado depende del navegador y puede enviar audio a su proveedor de reconocimiento. Usa
+        solo datos ficticios. Los cambios confirmados se guardan en este navegador.
       </div>
-      <Section title="Dicta o escribe una acción" subtitle="Indica una acción cada vez. También puedes seleccionar el tipo manualmente.">
+      <Section
+        title="Dicta o escribe una acción"
+        subtitle="Indica una acción cada vez. También puedes seleccionar el tipo manualmente."
+      >
         <div className="rr-stack">
           <SpeechInput onText={changeText} />
           <Field label="Nota transcrita o escrita">
-            <textarea value={text} onChange={(event) => changeText(event.target.value)} placeholder="Ej.: Registrar parte en BMW M3 E36: 2 horas; trabajo: montar frenos; operario: Àlex Ferrer" rows={4} />
+            <textarea
+              value={text}
+              onChange={(event) => changeText(event.target.value)}
+              placeholder="Ej.: Registrar parte en BMW M3 E36: 2 horas; trabajo: montar frenos; operario: Àlex Ferrer"
+              rows={4}
+            />
           </Field>
           <div className="rr-actions">
-            <button className="rr-button" disabled={!text.trim()} onClick={suggest}>Preparar propuesta</button>
+            <button className="rr-button" disabled={!text.trim()} onClick={suggest}>
+              Preparar propuesta
+            </button>
             <Field label="O selecciona una acción">
-              <select value="" onChange={(event) => {
-                const kind = event.target.value as ActionKind
-                if (ACTIONS.some((action) => action.kind === kind)) {
-                  setProposal({ kind, values: { date: today() } })
-                  setError('')
-                }
-              }}>
+              <select
+                value=""
+                onChange={(event) => {
+                  const kind = event.target.value as ActionKind
+                  if (ACTIONS.some((action) => action.kind === kind)) {
+                    setProposal({ kind, values: { date: today() } })
+                    setError('')
+                  }
+                }}
+              >
                 <option value="">Seleccionar</option>
-                {ACTIONS.map((action) => <option key={action.kind} value={action.kind}>{action.label}</option>)}
+                {ACTIONS.map((action) => (
+                  <option key={action.kind} value={action.kind}>
+                    {action.label}
+                  </option>
+                ))}
               </select>
             </Field>
           </div>
-          {error && <p className="rr-warning" role="alert">{error}</p>}
-          <div className="rr-example"><strong>Prueba un ejemplo</strong><div className="rr-actions">{examples.map((example) => <button type="button" className="rr-text-button" key={example} onClick={() => changeText(example)}>{example}</button>)}</div></div>
+          {error && (
+            <p className="rr-warning" role="alert">
+              {error}
+            </p>
+          )}
+          <div className="rr-example">
+            <strong>Prueba un ejemplo</strong>
+            <div className="rr-actions">
+              {examples.map((example) => (
+                <button
+                  type="button"
+                  className="rr-text-button"
+                  key={example}
+                  onClick={() => changeText(example)}
+                >
+                  {example}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </Section>
-      {proposal && <AssistantForm proposal={proposal} setProposal={setProposal} state={state} change={change} cancel={() => setProposal(null)} />}
+      {proposal && (
+        <AssistantForm
+          proposal={proposal}
+          setProposal={setProposal}
+          state={state}
+          change={change}
+          cancel={() => setProposal(null)}
+        />
+      )}
       <Section
         title="Lectura de albaranes y facturas"
-          subtitle="Ejemplo simulado: el archivo no se lee ni se sube."
+        subtitle="Ejemplo simulado: el archivo no se lee ni se sube."
       >
         <div className="rr-stack">
           <Field label="Seleccionar PDF de ejemplo">
