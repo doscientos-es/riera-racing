@@ -4,6 +4,7 @@ import type { LineKind, Project, Workshop } from '../domain/model'
 import {
   addProject,
   addQuoteLine,
+  addTask,
   approveProject,
   finishProject,
   projectCosts,
@@ -380,16 +381,9 @@ function ProjectTasks({
     const description = formText(data, 'task').trim()
     const worker = formText(data, 'worker').trim()
     if (
-      change((current) => {
-        if (!description || !worker) throw new Error('Indica la tarea y su responsable.')
-        return {
-          ...current,
-          tasks: [
-            ...current.tasks,
-            { id: uid(), projectId: project.id, description, worker, done: false },
-          ],
-        }
-      })
+      change((current) =>
+        addTask(current, { id: uid(), projectId: project.id, description, worker, done: false }),
+      )
     )
       form.reset()
   }

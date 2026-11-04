@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 
 import type { Workshop } from '../domain/model'
-import { addPart } from '../domain/workshop'
+import { addAbsence, addPart } from '../domain/workshop'
 import {
   Badge,
   Empty,
@@ -157,11 +157,7 @@ export function TeamPage({ state, change }: { state: Workshop; change: Change })
     const from = formText(data, 'from')
     const to = formText(data, 'to')
     if (
-      change((current) => {
-        if (!worker || !from || !to || to < from)
-          throw new Error('Revisa el operario y las fechas de vacaciones.')
-        return { ...current, absences: [{ id: uid(), worker, from, to }, ...current.absences] }
-      })
+      change((current) => addAbsence(current, { id: uid(), worker, from, to }))
     )
       setAdding(false)
   }

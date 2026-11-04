@@ -1,4 +1,4 @@
-import type { Invoice, Part, Product, Project, Purchase, QuoteLine, Workshop } from './model'
+import type { Absence, Invoice, Part, Product, Project, Purchase, QuoteLine, Task, Workshop } from './model'
 
 const positive = (value: number) => Number.isFinite(value) && value > 0
 const nonnegative = (value: number) => Number.isFinite(value) && value >= 0
@@ -196,4 +196,18 @@ export function createInvoice(state: Workshop, invoice: Invoice): Workshop {
       ...state.invoices,
     ],
   }
+}
+
+export function addTask(state: Workshop, task: Task): Workshop {
+  if (!state.projects.some((project) => project.id === task.projectId))
+    throw new Error('Selecciona un proyecto existente.')
+  if (!required(task.description) || !required(task.worker))
+    throw new Error('Indica la tarea y su responsable.')
+  return { ...state, tasks: [...state.tasks, task] }
+}
+
+export function addAbsence(state: Workshop, absence: Absence): Workshop {
+  if (!required(absence.worker) || !absence.from || !absence.to || absence.to < absence.from)
+    throw new Error('Revisa el operario y las fechas de vacaciones.')
+  return { ...state, absences: [absence, ...state.absences] }
 }
