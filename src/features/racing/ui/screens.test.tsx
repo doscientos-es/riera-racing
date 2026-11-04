@@ -30,10 +30,11 @@ describe('pantallas de la demo de taller', () => {
     expect(billing).toContain('CSV debe adaptarse')
   })
 
-  it('deja claro que el asistente no procesa audio ni documentos', () => {
-    const html = renderToStaticMarkup(<AssistantPage />)
-    expect(html).toContain('Sin conexión a IA')
-    expect(html).toContain('no graba audio')
-    expect(html).toContain('no procesa documentos')
+  it('deja claros los límites del asistente y permite revisar acciones', () => {
+    const html = renderToStaticMarkup(<AssistantPage state={state} change={change} />)
+    expect(html).toContain('Simulación sin IA')
+    expect(html).toContain('puede enviar audio')
+    expect(html).toContain('Preparar propuesta')
+    expect(html).toContain('El archivo no se lee ni se sube')
   })
 })

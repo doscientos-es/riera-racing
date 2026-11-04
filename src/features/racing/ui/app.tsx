@@ -170,7 +170,7 @@ export function RacingApp() {
           {page === 'compras' && <PurchasesPage state={state} change={change} />}
           {page === 'facturacion' && <BillingPage state={state} change={change} />}
           {page === 'equipo' && <TeamPage state={state} change={change} />}
-          {page === 'asistente' && <AssistantPage />}
+          {page === 'asistente' && <AssistantPage state={state} change={change} />}
           <footer className="rr-footer">
             Prototipo de demostración · Datos ficticios · Sin conexiones externas
             <button className="rr-reset-mobile" onClick={reset}>

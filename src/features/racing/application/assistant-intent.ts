@@ -30,7 +30,7 @@ function uniqueMention<T extends { id: string }>(text: string, items: T[], label
 }
 
 function field(text: string, name: string): string {
-  return text.match(new RegExp(`(?:^|[,;]\\s*)${name}\\s*:?\\s*([^,;]+)`, 'i'))?.[1]?.trim() ?? ''
+  return text.match(new RegExp(`(?:^|[,;]\\s*)(?:${name})\\s*:?\\s*([^,;]+)`, 'i'))?.[1]?.trim() ?? ''
 }
 
 /** Deliberately limited demo parser; ambiguous actions and entities are never guessed. */
@@ -55,8 +55,8 @@ export function suggestAction(text: string, state: Workshop, date: string): Prop
     kind: /\bmano de obra\b/.test(normalized) ? 'mano de obra' : '',
   }
   const numberPattern = '(\\d+(?:[.,]\\d+)?|cero|un|una|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)'
-  const hours = normalized.match(new RegExp(`${numberPattern}\\s+horas?\\b`))?.[1]
-  const quantity = field(text, 'cantidad') || normalized.match(new RegExp(`${numberPattern}\\s+(?:unidades?|uds?)\\b`))?.[1] || ''
+  const hours = text.match(new RegExp(`\\b${numberPattern}\\s+horas?\\b`, 'i'))?.[1]
+  const quantity = field(text, 'cantidad') || text.match(new RegExp(`\\b${numberPattern}\\s+(?:unidades?|uds?)\\b`, 'i'))?.[1] || ''
   values.hours = hours ? number(hours) : ''
   values.quantity = quantity ? number(quantity) : ''
   values.price = number(field(text, 'precio'))
