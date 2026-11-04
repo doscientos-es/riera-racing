@@ -2,34 +2,52 @@ import {
   Bot,
   Boxes,
   CalendarDays,
+  ChartColumn,
   ClipboardList,
+  Clock3,
   FileText,
   Gauge,
+  ListChecks,
+  Receipt,
   ShoppingCart,
+  TriangleAlert,
+  UsersRound,
   Wrench,
-  type LucideIcon,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { loadWorkshop, saveWorkshop, WORKSHOP_KEY } from '../api'
+import type { AssistantPrincipal } from '../application/assistant-access'
 import type { Workshop } from '../domain/model'
 import { AssistantPage } from './assistant'
 import { BillingPage } from './billing'
 import { Dashboard, type Page } from './dashboard'
+import { FloatingAssistant } from './floating-assistant'
 import { InventoryPage, PurchasesPage } from './inventory'
 import { OperationsPage, TeamPage } from './operations'
+import { ActivityPage, ClientsPage, FinanceOverviewPage } from './overview-pages'
+import { IncidentsPage, PlanningPage } from './planning'
 import { ProjectsPage } from './projects'
+import { Sidebar, type NavigationItem } from './sidebar'
 import type { Change } from './shared'
 
-const navigation: { id: Page; label: string; icon: LucideIcon }[] = [
-  { id: 'inicio', label: 'Inicio', icon: Gauge },
-  { id: 'proyectos', label: 'Proyectos', icon: ClipboardList },
-  { id: 'taller', label: 'Partes de taller', icon: Wrench },
-  { id: 'inventario', label: 'Inventario', icon: Boxes },
-  { id: 'compras', label: 'Compras', icon: ShoppingCart },
-  { id: 'facturacion', label: 'Facturación', icon: FileText },
-  { id: 'equipo', label: 'Equipo', icon: CalendarDays },
-  { id: 'asistente', label: 'Asistente IA', icon: Bot },
+const navigation: NavigationItem[] = [
+  { id: 'inicio', label: 'Inicio', icon: Gauge, group: 'Operativa' },
+  { id: 'incidencias', label: 'Incidencias', icon: TriangleAlert, group: 'Operativa' },
+  { id: 'presupuestos', label: 'Presupuestos', icon: FileText, group: 'Operativa' },
+  { id: 'proyectos', label: 'Proyectos', icon: ClipboardList, group: 'Operativa' },
+  { id: 'planificacion', label: 'Planificación', icon: ListChecks, group: 'Operativa' },
+  { id: 'taller', label: 'Partes de taller', icon: Wrench, group: 'Operativa' },
+  { id: 'inventario', label: 'Inventario', icon: Boxes, group: 'Operativa' },
+  { id: 'compras', label: 'Compras', icon: ShoppingCart, group: 'Operativa' },
+  { id: 'clientes', label: 'Clientes', icon: UsersRound, group: 'Administración' },
+  { id: 'equipo', label: 'Equipo y ausencias', icon: CalendarDays, group: 'Administración' },
+  { id: 'facturacion', label: 'Facturación', icon: Receipt, group: 'Administración' },
+  { id: 'gastos', label: 'Gastos', icon: Receipt, group: 'Administración' },
+  { id: 'contabilidad', label: 'Contabilidad', icon: ChartColumn, group: 'Administración' },
+  { id: 'informes', label: 'Informes', icon: ChartColumn, group: 'Administración' },
+  { id: 'actividad', label: 'Actividad', icon: Clock3, group: 'Administración' },
+  { id: 'asistente', label: 'Asistente IA', icon: Bot, group: 'Herramientas' },
 ]
 
 type Loaded = { state: Workshop; error: null } | { state: null; error: string }
@@ -50,6 +68,7 @@ export function RacingApp() {
   const [page, setPage] = useState<Page>('inicio')
   const [selected, setSelected] = useState('')
   const [message, setMessage] = useState('')
+  const [principal, setPrincipal] = useState<AssistantPrincipal>({ role: 'admin' })
   useEffect(() => {
     const onStorage = (event: StorageEvent) => {
       if (event.key === WORKSHOP_KEY) setLoaded(read())
@@ -72,10 +91,21 @@ export function RacingApp() {
       setMessage('No se han podido restablecer los datos locales.')
     }
   }
-  const change: Change = (command) => {
+  const commit = (command: Parameters<Change>[0], source: string) => {
     if (!loaded.state) return false
     try {
-      const next = command(loaded.state)
+      const updated = command(loaded.state)
+      const next = {
+        ...updated,
+        activity: [
+          {
+            id: crypto.randomUUID(),
+            at: new Date().toISOString(),
+            description: `Cambios guardados · ${source}`,
+          },
+          ...updated.activity,
+        ].slice(0, 200),
+      }
       saveWorkshop(window.localStorage, next)
       setLoaded({ state: next, error: null })
       setMessage('Cambios guardados en este navegador.')
@@ -85,6 +115,9 @@ export function RacingApp() {
       return false
     }
   }
+  const change: Change = (command) =>
+    commit(command, navigation.find((item) => item.id === page)?.label ?? 'Taller')
+  const assistantChange: Change = (command) => commit(command, 'Asistente simulado')
   if (!loaded.state)
     return (
       <main className="rr-failure">
@@ -102,32 +135,7 @@ export function RacingApp() {
       <a className="rr-skip" href="#contenido">
         Saltar al contenido
       </a>
-      <aside className="rr-sidebar">
-        <div className="rr-brand">
-          <img className="rr-brand-logo" src="/icon.png" alt="Riera Racing" />
-          <small>GESTIÓN DE TALLER</small>
-        </div>
-        <div className="rr-sidebar-label">ESPACIO DE TRABAJO</div>
-        <nav aria-label="Navegación principal">
-          {navigation.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              className={page === id ? 'active' : ''}
-              onClick={() => setPage(id)}
-              aria-current={page === id ? 'page' : undefined}
-            >
-              <Icon size={18} />
-              {label}
-              {id === 'asistente' && <span className="rr-nav-badge">DEMO</span>}
-            </button>
-          ))}
-        </nav>
-        <div className="rr-sidebar-footer">
-          <div className="rr-demo-dot">Entorno de demostración</div>
-          <p>Datos ficticios guardados solo en este navegador.</p>
-          <button onClick={reset}>Restablecer datos de ejemplo</button>
-        </div>
-      </aside>
+      <Sidebar state={state} principal={principal} navigation={navigation} page={page} navigate={setPage} reset={reset} />
       <div className="rr-main">
         <header className="rr-topbar">
           <div>
@@ -162,23 +170,58 @@ export function RacingApp() {
             </output>
           )}
           {page === 'inicio' && <Dashboard state={state} navigate={setPage} select={setSelected} />}
-          {page === 'proyectos' && (
-            <ProjectsPage state={state} change={change} selected={selected} select={setSelected} />
+          {(page === 'proyectos' || page === 'presupuestos') && (
+            <ProjectsPage
+              key={page}
+              state={state}
+              change={change}
+              selected={selected}
+              select={setSelected}
+              budgetsOnly={page === 'presupuestos'}
+            />
+          )}
+          {page === 'planificacion' && <PlanningPage state={state} change={change} />}
+          {page === 'incidencias' && <IncidentsPage state={state} change={change} />}
+          {page === 'clientes' && (
+            <ClientsPage
+              state={state}
+              openProject={(id) => {
+                setSelected(id)
+                setPage('proyectos')
+              }}
+            />
           )}
           {page === 'taller' && <OperationsPage state={state} change={change} />}
           {page === 'inventario' && <InventoryPage state={state} change={change} />}
           {page === 'compras' && <PurchasesPage state={state} change={change} />}
           {page === 'facturacion' && <BillingPage state={state} change={change} />}
+          {(page === 'gastos' || page === 'contabilidad' || page === 'informes') && (
+            <FinanceOverviewPage state={state} mode={page} />
+          )}
+          {page === 'actividad' && <ActivityPage state={state} />}
           {page === 'equipo' && <TeamPage state={state} change={change} />}
-          {page === 'asistente' && <AssistantPage state={state} change={change} />}
+          {page === 'asistente' && (
+            <AssistantPage
+              key={principal.role}
+              state={state}
+              change={assistantChange}
+              principal={principal}
+            />
+          )}
           <footer className="rr-footer">
-            Prototipo de demostración · Datos ficticios · Sin conexiones externas
+            Prototipo de demostración · Datos ficticios · Dictado según el navegador
             <button className="rr-reset-mobile" onClick={reset}>
               Restablecer datos de ejemplo
             </button>
           </footer>
         </main>
       </div>
+      <FloatingAssistant
+        state={state}
+        change={assistantChange}
+        principal={principal}
+        setPrincipal={setPrincipal}
+      />
     </div>
   )
 }

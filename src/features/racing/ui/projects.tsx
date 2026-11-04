@@ -30,14 +30,21 @@ export function ProjectsPage({
   change,
   selected,
   select,
+  budgetsOnly = false,
 }: {
   state: Workshop
   change: Change
   selected: string
   select: (id: string) => void
+  budgetsOnly?: boolean
 }) {
   const [creating, setCreating] = useState(false)
-  const project = state.projects.find((item) => item.id === selected) ?? state.projects[0]
+  const projects = budgetsOnly
+    ? [...state.projects].sort(
+        (a, b) => Number(b.status === 'presupuesto') - Number(a.status === 'presupuesto'),
+      )
+    : state.projects
+  const project = projects.find((item) => item.id === selected) ?? projects[0]
   const create = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
@@ -63,7 +70,7 @@ export function ProjectsPage({
       <div className="rr-heading">
         <div>
           <span className="rr-eyebrow">DEL PRESUPUESTO A LA ENTREGA</span>
-          <h1>Proyectos de taller</h1>
+          <h1>{budgetsOnly ? 'Presupuestos' : 'Proyectos de taller'}</h1>
           <p>Cada vehículo, su presupuesto y el trabajo realizado en un solo lugar.</p>
         </div>
         <button className="rr-button" onClick={() => setCreating(!creating)}>
@@ -98,9 +105,12 @@ export function ProjectsPage({
         </Section>
       )}
       <div className="rr-project-layout">
-        <Section title="Proyectos" subtitle={`${state.projects.length} vehículos y trabajos`}>
+        <Section
+          title={budgetsOnly ? 'Presupuestos' : 'Proyectos'}
+          subtitle={`${projects.length} vehículos y trabajos`}
+        >
           <div className="rr-project-list">
-            {state.projects.map((item) => (
+            {projects.map((item) => (
               <button
                 key={item.id}
                 className={`rr-project-item ${project?.id === item.id ? 'is-selected' : ''}`}

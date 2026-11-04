@@ -80,6 +80,20 @@ export interface Task {
   done: boolean
 }
 
+export interface Incident {
+  id: string
+  projectId: string
+  description: string
+  date: string
+  resolved: boolean
+}
+
+export interface Activity {
+  id: string
+  at: string
+  description: string
+}
+
 export interface Workshop {
   version: 1
   projects: Project[]
@@ -89,4 +103,6 @@ export interface Workshop {
   invoices: Invoice[]
   absences: Absence[]
   tasks: Task[]
+  incidents: Incident[]
+  activity: Activity[]
 }

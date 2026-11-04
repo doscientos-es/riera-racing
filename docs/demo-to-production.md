@@ -1,5 +1,7 @@
 # De demo a producción
 
+> **Documento heredado de Gestión Forestal:** las rutas, el modelo y la matriz siguientes no describen la demo de Riera Racing. Su implementación actual usa `features/racing` y `localStorage`; ver el README para el alcance real. El paso a producción requiere definir un diseño específico para el taller.
+
 ## Qué se conserva
 
 Dominio puro (`features/workspace/application`), pantallas, rutas, contratos `Repository<T>` y `api.ts`, y los tests. Cambian los adaptadores.

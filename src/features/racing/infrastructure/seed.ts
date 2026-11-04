@@ -181,5 +181,7 @@ export function seedWorkshop(): Workshop {
         done: true,
       },
     ],
+    incidents: [],
+    activity: [],
   }
 }

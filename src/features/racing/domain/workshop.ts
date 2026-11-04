@@ -1,5 +1,6 @@
 import type {
   Absence,
+  Incident,
   Invoice,
   Part,
   Product,
@@ -220,4 +221,12 @@ export function addAbsence(state: Workshop, absence: Absence): Workshop {
   if (!required(absence.worker) || !absence.from || !absence.to || absence.to < absence.from)
     throw new Error('Revisa el operario y las fechas de vacaciones.')
   return { ...state, absences: [absence, ...state.absences] }
+}
+
+export function addIncident(state: Workshop, incident: Incident): Workshop {
+  if (!state.projects.some((project) => project.id === incident.projectId))
+    throw new Error('Selecciona un proyecto existente.')
+  if (!required(incident.description) || !incident.date)
+    throw new Error('Indica la incidencia y su fecha.')
+  return { ...state, incidents: [incident, ...state.incidents] }
 }

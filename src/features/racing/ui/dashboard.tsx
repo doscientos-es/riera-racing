@@ -1,5 +1,3 @@
-import { ArrowRight, ClipboardList, Package, Timer, Wallet } from 'lucide-react'
-
 import type { Workshop } from '../domain/model'
 import { projectCosts, quoteTotal } from '../domain/workshop'
 import { Badge, Section, Status, money } from './shared'
@@ -7,6 +5,14 @@ import { Badge, Section, Status, money } from './shared'
 export type Page =
   | 'inicio'
   | 'proyectos'
+  | 'presupuestos'
+  | 'planificacion'
+  | 'incidencias'
+  | 'clientes'
+  | 'gastos'
+  | 'contabilidad'
+  | 'informes'
+  | 'actividad'
   | 'taller'
   | 'inventario'
   | 'compras'
@@ -31,51 +37,33 @@ export function Dashboard({
     <div className="rr-stack rr-dashboard">
       <div className="rr-heading">
         <div>
-          <span className="rr-eyebrow">EL TALLER, BAJO CONTROL</span>
-          <h1>Bon dia, equipo.</h1>
-          <p>Una visión clara de los vehículos, las piezas y el trabajo pendiente.</p>
+          <h1>Hola, equipo</h1>
+          <p>Así va el taller. Datos de demostración.</p>
         </div>
-        <div className="rr-date">DEMO · RIERA RACING</div>
+        <button className="rr-button" onClick={() => navigate('presupuestos')}>
+          Ver presupuestos
+        </button>
       </div>
       <div className="rr-metrics rr-dashboard-metrics">
         <div>
-          <ClipboardList />
           <span>Vehículos en taller</span>
           <strong>{active.length}</strong>
           <small>proyectos en marcha</small>
         </div>
         <div>
-          <Timer />
           <span>Presupuestos pendientes</span>
           <strong>{budgets.length}</strong>
           <small>por revisar y aprobar</small>
         </div>
         <div>
-          <Package />
           <span>Piezas a reponer</span>
           <strong>{lowStock.length}</strong>
           <small>en o bajo el mínimo</small>
         </div>
         <div>
-          <Wallet />
           <span>Pedidos pendientes</span>
           <strong>{pending.length}</strong>
           <small>por recibir</small>
-        </div>
-      </div>
-      <div className="rr-hero">
-        <div>
-          <span className="rr-eyebrow">DE LA IDEA A LA PISTA</span>
-          <h2>Todo el trabajo de cada vehículo, conectado.</h2>
-          <p>
-            Presupuesta, registra las horas y controla cada pieza sin perder el hilo del proyecto.
-          </p>
-          <button className="rr-button rr-button-white" onClick={() => navigate('proyectos')}>
-            Ver proyectos <ArrowRight size={16} />
-          </button>
-        </div>
-        <div className="rr-hero-number">
-          RR<span> / 01</span>
         </div>
       </div>
       <div className="rr-two-col">
@@ -135,6 +123,22 @@ export function Dashboard({
                 <p>Comprueba cantidades antes de actualizar almacén.</p>
               </div>
               <Badge tone="amber">{pending.length}</Badge>
+            </button>
+            <button className="rr-list-row rr-click-row" onClick={() => navigate('planificacion')}>
+              <div>
+                <strong>Tareas pendientes</strong>
+                <p>Trabajos asignados al equipo.</p>
+              </div>
+              <Badge tone="amber">{state.tasks.filter((task) => !task.done).length}</Badge>
+            </button>
+            <button className="rr-list-row rr-click-row" onClick={() => navigate('incidencias')}>
+              <div>
+                <strong>Incidencias abiertas</strong>
+                <p>Imprevistos de los proyectos.</p>
+              </div>
+              <Badge tone="amber">
+                {state.incidents.filter((incident) => !incident.resolved).length}
+              </Badge>
             </button>
             <button className="rr-list-row rr-click-row" onClick={() => navigate('asistente')}>
               <div>

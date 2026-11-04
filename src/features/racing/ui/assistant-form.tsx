@@ -1,6 +1,6 @@
 import type { FormEvent } from 'react'
 
-import { applyProposal } from '../application/assistant-command'
+import { applyAssistantProposal, type AssistantPrincipal } from '../application/assistant-access'
 import { ACTIONS, type ActionKind, type Proposal } from '../application/assistant-intent'
 import type { Workshop } from '../domain/model'
 import { Field, Section, uid, type Change } from './shared'
@@ -82,12 +82,16 @@ export function AssistantForm({
   state,
   change,
   cancel,
+  principal,
+  onSaved,
 }: {
   proposal: Proposal
   setProposal: (proposal: Proposal) => void
   state: Workshop
   change: Change
   cancel: () => void
+  principal: AssistantPrincipal
+  onSaved?: () => void
 }) {
   const [kind, values] = [proposal.kind, proposal.values]
   const purchase = state.purchases.find((item) => item.id === values.purchaseId)
@@ -103,10 +107,18 @@ export function AssistantForm({
     const id = uid()
     if (
       change((current) =>
-        applyProposal(current, proposal, id, values.confirmedDifference === 'yes'),
+        applyAssistantProposal(
+          current,
+          proposal,
+          principal,
+          id,
+          values.confirmedDifference === 'yes',
+        ),
       )
-    )
+    ) {
       cancel()
+      onSaved?.()
+    }
   }
   const label = ACTIONS.find((item) => item.kind === kind)?.label ?? ''
   return (

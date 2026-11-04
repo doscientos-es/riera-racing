@@ -18,7 +18,12 @@ export function loadWorkshop(storage: Pick<Storage, 'getItem'>): Workshop {
       !Array.isArray(data.absences)
     )
       throw new Error('Formato no reconocido')
-    return { ...data, tasks: Array.isArray(data.tasks) ? data.tasks : [] }
+    return {
+      ...data,
+      tasks: Array.isArray(data.tasks) ? data.tasks : [],
+      incidents: Array.isArray(data.incidents) ? data.incidents : [],
+      activity: Array.isArray(data.activity) ? data.activity : [],
+    }
   } catch {
     throw new Error(
       'No se pueden leer los datos guardados. Restablece la demo para recuperar los datos de ejemplo.',

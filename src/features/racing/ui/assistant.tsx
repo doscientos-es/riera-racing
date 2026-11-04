@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { canUseAction, type AssistantPrincipal } from '../application/assistant-access'
 import {
   ACTIONS,
   suggestAction,
@@ -19,7 +20,15 @@ const examples = [
   'Crear borrador de factura del BMW M3 E36',
 ]
 
-export function AssistantPage({ state, change }: { state: Workshop; change: Change }) {
+export function AssistantPage({
+  state,
+  change,
+  principal,
+}: {
+  state: Workshop
+  change: Change
+  principal: AssistantPrincipal
+}) {
   const [text, setText] = useState('')
   const [proposal, setProposal] = useState<Proposal | null>(null)
   const [error, setError] = useState('')
@@ -30,7 +39,14 @@ export function AssistantPage({ state, change }: { state: Workshop; change: Chan
     setError('')
   }
   const suggest = () => {
-    const result = suggestAction(text, state, today())
+    let result = suggestAction(text, state, today())
+    if (result && !canUseAction(principal, result.kind)) {
+      setProposal(null)
+      setError('Esta acción no está disponible para el perfil de trabajador.')
+      return
+    }
+    if (result && principal.role === 'worker' && !result.values.worker)
+      result = { ...result, values: { ...result.values, worker: principal.name } }
     setProposal(result)
     setError(
       result
@@ -51,7 +67,10 @@ export function AssistantPage({ state, change }: { state: Workshop; change: Chan
       <div className="rr-notice">
         <strong>Simulación sin IA.</strong> Reconoce frases sencillas, no entiende lenguaje libre.
         El dictado depende del navegador y puede enviar audio a su proveedor de reconocimiento. Usa
-        solo datos ficticios. Los cambios confirmados se guardan en este navegador.
+        solo datos ficticios. Los cambios confirmados se guardan en este navegador. Perfil del
+        asistente:{' '}
+        {principal.role === 'admin' ? 'Administración' : `trabajador · ${principal.name}`}. Puedes
+        cambiarlo en el botón flotante; es una simulación, no un control de acceso real.
       </div>
       <Section
         title="Dicta o escribe una acción"
@@ -77,13 +96,19 @@ export function AssistantPage({ state, change }: { state: Workshop; change: Chan
                 onChange={(event) => {
                   const kind = event.target.value as ActionKind
                   if (ACTIONS.some((action) => action.kind === kind)) {
-                    setProposal({ kind, values: { date: today() } })
+                    setProposal({
+                      kind,
+                      values: {
+                        date: today(),
+                        ...(principal.role === 'worker' ? { worker: principal.name } : {}),
+                      },
+                    })
                     setError('')
                   }
                 }}
               >
                 <option value="">Seleccionar</option>
-                {ACTIONS.map((action) => (
+                {ACTIONS.filter((action) => canUseAction(principal, action.kind)).map((action) => (
                   <option key={action.kind} value={action.kind}>
                     {action.label}
                   </option>
@@ -119,6 +144,7 @@ export function AssistantPage({ state, change }: { state: Workshop; change: Chan
           setProposal={setProposal}
           state={state}
           change={change}
+          principal={principal}
           cancel={() => setProposal(null)}
         />
       )}
