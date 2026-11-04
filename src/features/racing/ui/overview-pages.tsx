@@ -1,3 +1,5 @@
+import { Button } from '@doscientos/ui'
+
 import { clientSummaries, workshopOverview } from '../application/overview'
 import type { Workshop } from '../domain/model'
 import { quoteTotal } from '../domain/workshop'
@@ -33,13 +35,13 @@ export function ClientsPage({
                 </p>
                 <div className="rr-actions">
                   {projects.map((project) => (
-                    <button
+                    <Button
                       key={project.id}
-                      className="rr-button rr-button-light"
+                      variant="outline"
                       onClick={() => openProject(project.id)}
                     >
                       {project.reference} · {project.vehicle}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>

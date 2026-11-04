@@ -14,7 +14,7 @@ import {
   UsersRound,
   Wrench,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { loadWorkshop, saveWorkshop, WORKSHOP_KEY } from '../api'
 import type { AssistantPrincipal } from '../application/assistant-access'
@@ -69,6 +69,7 @@ export function RacingApp() {
   const [selected, setSelected] = useState('')
   const [message, setMessage] = useState('')
   const [formError, setFormError] = useState('')
+  const clearFormError = useCallback(() => setFormError(''), [])
   const [principal, setPrincipal] = useState<AssistantPrincipal>({ role: 'admin' })
   useEffect(() => {
     const onStorage = (event: StorageEvent) => {
@@ -135,7 +136,7 @@ export function RacingApp() {
     )
   const state = loaded.state
   return (
-    <FormErrorContext.Provider value={{ error: formError, clear: () => setFormError('') }}>
+    <FormErrorContext.Provider value={{ error: formError, clear: clearFormError }}>
       <div className="rr-app">
         <a className="rr-skip" href="#contenido">
           Saltar al contenido

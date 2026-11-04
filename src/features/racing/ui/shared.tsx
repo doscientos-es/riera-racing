@@ -5,14 +5,14 @@ import {
   DialogRoot,
   DialogTitle,
 } from '@doscientos/ui'
-import { createContext, useContext, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, type ReactNode } from 'react'
 
 import type { Project, Workshop } from '../domain/model'
 
 export type Change = (command: (state: Workshop) => Workshop) => boolean
 export const FormErrorContext = createContext<{ error: string; clear: () => void }>({
   error: '',
-  clear: () => {},
+  clear: () => { },
 })
 
 export function FormDialog({
@@ -29,6 +29,9 @@ export function FormDialog({
   children: ReactNode
 }) {
   const { error, clear } = useContext(FormErrorContext)
+  useEffect(() => {
+    if (open) clear()
+  }, [open, clear])
   return (
     <DialogRoot
       open={open}
